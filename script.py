@@ -217,10 +217,6 @@ def main():
 
     # Test the model
     test(model, test_loader, trainer)
-
-    # Save the model
-    name = "model"
-    
     
     # Save script params and outputs in a csv file
     df = pd.DataFrame({
@@ -228,9 +224,9 @@ def main():
         "val_data_size": [val_data_size],
         "random_seed": [random_seed],
         "representation": [representation],
-        "train_acc": [model.train_acc.compute()],
-        "val_acc": [model.val_acc.compute()],
-        "test_acc": [model.test_acc.compute()]
+        "train_acc": [model.train_acc.compute().item()],
+        "val_acc": [model.val_acc.compute().item()],
+        "test_acc": [model.test_acc.compute().item()]
     })
     filename = "params_and_outputs.csv" 
     file_exists = os.path.isfile(filename)
