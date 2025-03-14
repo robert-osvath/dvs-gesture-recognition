@@ -1,0 +1,11 @@
+tonic
+torch
+torchvision
+numpy
+matplotlib
+tqdm
+torchmetrics
+lightning
+Pillow
+seaborn
+tensorboard
