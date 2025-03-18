@@ -5,7 +5,7 @@
 The script trains the base 3-Layer CNN model, as well as runs a test with the test subset of the data, and at the end extracts the user parameters and output metrics in a CSV file. The user willl need to give the following paramters:
 
 * The size of the training data as a percentage of the whole dataset
-* The size of the validation data as a percentage of the whole dataset (an early stopping mechanism is implemented based on validation metrics)
+* The size of the validation data as a percentage of the whole dataset (an early stopping mechanism is implemented based on validation metrics) - train size + val size need to add up to 1
 * The random seed
 * The representation of the dvs data (the architecture as of now can only handle data with a uniform temporal dimension, so "n_bins" or "binary")
 * Maximum epochs for training
