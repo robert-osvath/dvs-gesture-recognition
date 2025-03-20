@@ -1,2 +1,0 @@
-train_data_size,val_data_size,random_seed,representation,train_acc,val_acc,test_acc
-0.1,0.05,42,binary,tensor(0.1019),tensor(0.0741),tensor(0.1742)
