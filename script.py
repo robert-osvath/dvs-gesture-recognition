@@ -224,6 +224,9 @@ def main():
     # Test the model
     test(model, test_loader, trainer)
 
+    # Get the number of epochs used for training
+    num_epochs = trainer.current_epoch + 1
+
     # Save script params and outputs in a csv file
     df = pd.DataFrame(
         {
@@ -234,6 +237,7 @@ def main():
             "train_acc": [model.train_acc.compute().item()],
             "val_acc": [model.val_acc.compute().item()],
             "test_acc": [model.test_acc.compute().item()],
+            "num_epochs": [num_epochs],
         }
     )
     filename = "params_and_outputs.csv"
