@@ -157,12 +157,17 @@ def main():
         "--max-epochs", type=int, required=True, help="Set the max epochs."
     )
 
+    parser.add_argument(
+        "--name", type=str, required=True, help="set the exp name."
+    )
+
     args = parser.parse_args()
     train_data_size = args.train_data_size
     val_data_size = args.val_data_size
     random_seed = args.random_seed
     representation = args.representation
     max_epochs = args.max_epochs
+    exp_name = args.name
 
     # Set the random seed
     L.seed_everything(random_seed, workers=True)
@@ -186,12 +191,18 @@ def main():
         raise ValueError("Invalid train or val data size.")
 
     # Load the datasets
+    print("splitting with ",train_data_size,val_data_size,1-train_data_size-val_data_size)
+    #train_folder="./data_%d_%d"%(round(train_data_size)*100,seed)
+    #test_folder="./data_test"
+
+    #if !os.path.isdir(train_folder):
     train_data, val_data, _ = random_split(
-        tonic.datasets.DVSGesture(save_to="./data", train=True, transform=transform),
-        [train_data_size, val_data_size, 1 - train_data_size - val_data_size],
+        tonic.datasets.DVSGesture(save_to=("./data_%s"%(exp_name)), train=True, transform=transform),
+        [train_data_size, val_data_size, round((1 - train_data_size - val_data_size)*100)/100],
     )
+
     test_data = tonic.datasets.DVSGesture(
-        save_to="./data", train=False, transform=transform
+        save_to=("./data_%s"%(exp_name)), train=False, transform=transform
     )
 
     # Create the transformed datasets
@@ -240,7 +251,7 @@ def main():
             "num_epochs": [num_epochs],
         }
     )
-    filename = "params_and_outputs.csv"
+    filename = "%s_params_and_outputs.csv"%(exp_name)
     file_exists = os.path.isfile(filename)
     df.to_csv(filename, mode="a", header=not file_exists, index=False)
 

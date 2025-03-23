@@ -12,5 +12,18 @@ The script trains the base 3-Layer CNN model, as well as runs a test with the te
 
 Command: 
 ```bash
-python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS]
+python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME]
 ```
+
+Example:
+```bash 
+python3 script.py --train-data-size 0.9 --val-data-size 0.1 --random-seed 42 --representation n_bins --max-epochs 100 --name n_bins_09^_42
+python3 script.py --train-data-size 0.9 --val-data-size 0.1 --random-seed 42 --representation binary --max-epochs 100 --name binary_09_42
+```
+
+Requirements:
+
+
+Installation:
+
+
