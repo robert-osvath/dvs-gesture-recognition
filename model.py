@@ -41,3 +41,4 @@ class Gesture3DConvNet(nn.Module):
         "logits": x,
         "probs": F.softmax(x, dim=1)
     }
+  
