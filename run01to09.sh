@@ -4,7 +4,7 @@ for seed in 42 13 93
 do
 	for repr in n_bins binary
 	do
-		echo python3 script.py --train-data-size ${size} --val-data-size 0.1 --random-seed $seed --representation ${repr} --max-epochs 100 --name ${repr}_09_${seed}
+		echo python3 script.py --train-data-size ${size} --val-data-size 0.1 --random-seed $seed --representation ${repr} --max-epochs 100 --name ${repr}_09_${seed}_8 --batch-size 8
 	done
 done
 done

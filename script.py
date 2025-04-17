@@ -158,6 +158,10 @@ def main():
     )
 
     parser.add_argument(
+        "--batch-size", type=int, required=True, help="Set the max epochs."
+    )
+
+    parser.add_argument(
         "--name", type=str, required=True, help="set the exp name."
     )
 
@@ -167,6 +171,7 @@ def main():
     random_seed = args.random_seed
     representation = args.representation
     max_epochs = args.max_epochs
+    batch_size = args.batch_size
     exp_name = args.name
 
     # Set the random seed
@@ -197,12 +202,12 @@ def main():
 
     #if !os.path.isdir(train_folder):
     train_data, val_data, _ = random_split(
-        tonic.datasets.DVSGesture(save_to=("./data_%s"%(exp_name)), train=True, transform=transform),
+        tonic.datasets.DVSGesture(save_to=("./data"), train=True, transform=transform),
         [train_data_size, val_data_size, round((1 - train_data_size - val_data_size)*100)/100],
     )
 
     test_data = tonic.datasets.DVSGesture(
-        save_to=("./data_%s"%(exp_name)), train=False, transform=transform
+        save_to=("./data"), train=False, transform=transform
     )
 
     # Create the transformed datasets
@@ -212,7 +217,7 @@ def main():
 
     # Create the data loaders
     # !! Make sure to change num_workers accordingly !!
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 
@@ -249,6 +254,7 @@ def main():
             "val_acc": [model.val_acc.compute().item()],
             "test_acc": [model.test_acc.compute().item()],
             "num_epochs": [num_epochs],
+            "batch_size": [batch_size]
         }
     )
     filename = "%s_params_and_outputs.csv"%(exp_name)
