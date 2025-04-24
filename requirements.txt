@@ -9,3 +9,4 @@ lightning
 Pillow
 seaborn
 tensorboard
+snntorch
