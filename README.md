@@ -36,3 +36,13 @@ Command for updated script:
 ```bash
 python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE]
 ```
+
+## New script to train a 3d Convolutional Spiking Neural Network model
+
+Created a new SNN model that uses 3d convolutions for feature extraction. <br>
+**!! You need to be much more careful with the batch sizes when training this model, as the LIF neurons take up a lot of memory. !!**
+
+Command for the snn script:
+```bash
+python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE]
+```
