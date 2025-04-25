@@ -26,11 +26,13 @@ from tonic import DiskCachedDataset
 device = "gpu" if torch.cuda.is_available() else "cpu"
 
 class GestureRecognition(L.LightningModule):
-  def __init__(self, lr, spike_grad=surrogate.atan(), num_classes=11):
+  def __init__(self, lr, loss_fn, spike_grad=surrogate.atan(), num_classes=11):
     super().__init__()
     self.save_hyperparameters()
     self.model = Gesture3DCSNN(num_classes).to(device)
-    self.loss_fn = SF.ce_count_loss()
+    # self.loss_fn = SF.ce_count_loss()
+    # self.loss_fn = SF.ce_temporal_loss()
+    self.loss_fn = loss_fn
     self.confusion_matrix = ConfusionMatrix(task="multiclass", num_classes=num_classes)
 
   def training_step(self, batch, batch_idx):
@@ -163,11 +165,19 @@ def main():
     )
 
     parser.add_argument(
+       "--loss",
+       type=str,
+       choices=["latency", "frequency"],
+       required=True,
+       help="The type of loss function the model should optimize: based either on spike timing (latency) or spike rate (frequency)"
+    )
+
+    parser.add_argument(
         "--max-epochs", type=int, required=True, help="Set the max epochs."
     )
 
     parser.add_argument(
-        "--batch-size", type=int, default=10, help="Set the batch size."
+        "--batch-size", type=int, required=True, help="Set the batch size."
     )
 
     parser.add_argument(
@@ -179,6 +189,7 @@ def main():
     val_data_size = args.val_data_size
     random_seed = args.random_seed
     representation = args.representation
+    loss = args.loss
     max_epochs = args.max_epochs
     exp_name = args.name
     batch_size = args.batch_size
@@ -209,6 +220,13 @@ def main():
         )
     else:
         raise ValueError("Invalid representation.")
+    
+    if loss == "latency":
+       loss_fn = SF.ce_temporal_loss()
+    elif loss == "frequency":
+       loss_fn = SF.ce_rate_loss()
+    else:
+       raise ValueError("Invalid loss function.")
 
     # Validate train and val data size
     if train_data_size + val_data_size > 1 or train_data_size < 0 or val_data_size < 0:
@@ -241,7 +259,7 @@ def main():
     test_loader = DataLoader(test_data, batch_size=batch_size, collate_fn=tonic.collation.PadTensors(batch_first=True), shuffle=False)
 
     # Create the model
-    model = GestureRecognition(1e-3)
+    model = GestureRecognition(lr=0.001, loss_fn=loss_fn)
 
     # Alternatively, you can load the model from a checkpoint
     # model = GestureRecognition.load_from_checkpoint("checkpoints/a.ckpt")
