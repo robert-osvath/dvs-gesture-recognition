@@ -23,7 +23,8 @@ from snntorch import surrogate, functional as SF
 from tonic import DiskCachedDataset
 
 
-device = "gpu" if torch.cuda.is_available() else "cpu"
+#device = "gpu" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class GestureRecognition(L.LightningModule):
   def __init__(self, lr, loss_fn, spike_grad=surrogate.atan(), num_classes=11):
@@ -229,7 +230,7 @@ def main():
        raise ValueError("Invalid loss function.")
 
     # Validate train and val data size
-    if train_data_size + val_data_size > 1 or train_data_size < 0 or val_data_size < 0:
+    if train_data_size + val_data_size > 1+1e4 or train_data_size < 0 or val_data_size < 0:
         raise ValueError("Invalid train or val data size.")
 
     # Load the datasets
@@ -237,7 +238,7 @@ def main():
 
     train_data, val_data, _ = random_split(
         tonic.datasets.DVSGesture(save_to=("./data"), train=True, transform=transform),
-        [train_data_size, val_data_size, 1 - train_data_size - val_data_size],
+        [train_data_size, val_data_size, 0],
     )
 
     test_data = tonic.datasets.DVSGesture(
