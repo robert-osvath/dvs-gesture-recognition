@@ -238,7 +238,7 @@ def main():
 
     train_data, val_data, _ = random_split(
         tonic.datasets.DVSGesture(save_to=("./data"), train=True, transform=transform),
-        [train_data_size, val_data_size, 0],
+        [train_data_size, val_data_size, (1-train_data_size-val_data_size)],
     )
 
     test_data = tonic.datasets.DVSGesture(
