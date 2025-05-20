@@ -1,7 +1,7 @@
 batch=${1:-8}
 for seed in 42 13 93 45 96 6 98 59 44
 do
-	for repr in n_bins binary time_window spike_count timesurface
+	for repr in n_bins binary time_window spike_count #timesurface
 	do
 		for coding in latency frequency
 		do
