@@ -37,7 +37,7 @@ class GestureRecognition(L.LightningModule):
 
   def training_step(self, batch, batch_idx):
     events, targets = batch
-    events, targets = events.to(device), targets.to(device).long()
+    events, targets = events.to(device).float(), targets.to(device)
 
     output = self.model(events)
     spike_rec = output['spike_rec']
@@ -52,7 +52,7 @@ class GestureRecognition(L.LightningModule):
 
   def validation_step(self, batch, batch_idx):
     events, targets = batch
-    events, targets = events.to(device), targets.to(device)
+    events, targets = events.to(device).float(), targets.to(device)
 
     output = self.model(events)
     spike_rec = output['spike_rec']
@@ -87,7 +87,7 @@ class GestureRecognition(L.LightningModule):
 
   def test_step(self, batch, batch_idx):
     events, targets = batch
-    events, targets = events.to(device), targets.to(device)
+    events, targets = events.to(device).float(), targets.to(device)
 
     output = self.model(events)
     spike_rec = output['spike_rec']
