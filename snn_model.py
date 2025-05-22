@@ -5,11 +5,11 @@ import snntorch as snn
 from snntorch import utils, surrogate 
 
 class Gesture3DCSNN(nn.Module):
-  def __init__(self, classes):
+  def __init__(self, beta, classes):
     super(Gesture3DCSNN, self).__init__()
-    self.conv1 = self._make_conv_layer(2, 8, beta=0.9)
-    self.conv2 = self._make_conv_layer(8, 16, beta=0.9)
-    self.conv3 = self._make_conv_layer(16, 32, beta=0.9)
+    self.conv1 = self._make_conv_layer(2, 8, beta=beta)
+    self.conv2 = self._make_conv_layer(8, 16, beta=beta)
+    self.conv3 = self._make_conv_layer(16, 32, beta=beta)
 
     self.adaptive_pool = nn.AdaptiveAvgPool3d((12, 16, 16))
 

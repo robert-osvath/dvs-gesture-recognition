@@ -27,10 +27,10 @@ from tonic import DiskCachedDataset
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class GestureRecognition(L.LightningModule):
-  def __init__(self, lr, loss_fn, spike_grad=surrogate.atan(), num_classes=11):
+  def __init__(self, lr, loss_fn, beta, spike_grad=surrogate.atan(), num_classes=11):
     super().__init__()
     self.save_hyperparameters()
-    self.model = Gesture3DCSNN(num_classes).to(device)
+    self.model = Gesture3DCSNN(beta, num_classes).to(device)
     # self.loss_fn = SF.ce_count_loss()
     # self.loss_fn = SF.ce_temporal_loss()
     self.loss_fn = loss_fn
@@ -174,6 +174,10 @@ def main():
     )
 
     parser.add_argument(
+        "--beta", type=float, required=True, help="Set the beta value."
+    )
+
+    parser.add_argument(
         "--max-epochs", type=int, required=True, help="Set the max epochs."
     )
 
@@ -192,6 +196,7 @@ def main():
     representation = args.representation
     loss = args.loss
     max_epochs = args.max_epochs
+    beta = args.beta
     exp_name = args.name
     batch_size = args.batch_size
 
@@ -262,7 +267,7 @@ def main():
     test_loader = DataLoader(test_data, batch_size=batch_size, collate_fn=tonic.collation.PadTensors(batch_first=True), shuffle=False)
 
     # Create the model
-    model = GestureRecognition(lr=0.001, loss_fn=loss_fn)
+    model = GestureRecognition(lr=0.001, loss_fn=loss_fn, beta=beta)
 
     # Alternatively, you can load the model from a checkpoint
     # model = GestureRecognition.load_from_checkpoint("checkpoints/a.ckpt")
