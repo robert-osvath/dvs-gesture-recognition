@@ -10,7 +10,7 @@ do
 	
 			res=`find . | grep ${repr}_${coding}_${size}_${seed}_${batch}`
 			echo -n "${repr},${coding},${size},0.1,${seed},${batch},0,0,"
-			if [ -z $res ]
+			if [ -z "$res" ]
 			then
 				echo 
 				count=$(($count+1))
