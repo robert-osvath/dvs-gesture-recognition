@@ -42,11 +42,16 @@ class GestureRecognition(L.LightningModule):
 
     output = self.model(events)
     spike_rec = output['spike_rec']
+    mem_rec = output['mem_rec']
     probs = output['probs']
 
     print(f"Output dtype: {spike_rec.dtype}")  # Should be float32
     print(f"Targets dtype: {targets.dtype}")         # Should be int64 (long)
-    loss = self.loss_fn(spike_rec, targets)
+    # loss = self.loss_fn(spike_rec, targets)
+    if isinstance(self.loss_fn, SF.ce_max_mem_loss):
+       loss = self.loss_fn(mem_rec, targets)
+    else:
+       loss = self.loss_fn(spike_rec, targets)
     self.log('train_loss', loss.item(), on_step=True, on_epoch=True, prog_bar=True)
 
     return loss
