@@ -66,7 +66,7 @@ class GestureRecognition(L.LightningModule):
     probs = output['probs']
 
     # loss = self.loss_fn(spike_rec, targets)
-    if isinstance(self.loss_fn, SF.ce_max_mem_loss):
+    if isinstance(self.loss_fn, SF.ce_max_membrane_loss):
        loss = self.loss_fn(mem_rec, targets)
     else:
        loss = self.loss_fn(spike_rec, targets)
@@ -106,7 +106,7 @@ class GestureRecognition(L.LightningModule):
     probs = output['probs']
 
     # loss = self.loss_fn(spike_rec, targets)
-    if isinstance(self.loss_fn, SF.ce_max_mem_loss):
+    if isinstance(self.loss_fn, SF.ce_max_membrane_loss):
        loss = self.loss_fn(mem_rec, targets)
     else:
        loss = self.loss_fn(spike_rec, targets)
