@@ -16,9 +16,9 @@ class Gesture3DCSNN(nn.Module):
     self.classifier = nn.Sequential(
         nn.Flatten(),
         nn.Linear(32 * 16 * 16, 128),
-        snn.Leaky(beta=0.9, spike_grad=surrogate.atan(), init_hidden=True),
+        snn.Leaky(beta=beta, spike_grad=surrogate.atan(), init_hidden=True),
         nn.Linear(128, classes),
-        snn.Leaky(beta=0.9, spike_grad=surrogate.atan(), init_hidden=True, output=True)
+        snn.Leaky(beta=beta, spike_grad=surrogate.atan(), init_hidden=True, output=True)
     )
 
   def _make_conv_layer(self, in_channels, out_channels, beta, spike_grad=surrogate.atan()):
