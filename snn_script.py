@@ -307,6 +307,7 @@ def main():
             "num_epochs": [num_epochs],
             "batch_size": [batch_size],
             "loss": [loss],
+            "beta": [beta]
         }
     )
     filename = "%s_params_and_outputs.csv"%(exp_name)
