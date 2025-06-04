@@ -62,9 +62,14 @@ class GestureRecognition(L.LightningModule):
 
     output = self.model(events)
     spike_rec = output['spike_rec']
+    mem_rec = output['mem_rec']
     probs = output['probs']
 
-    loss = self.loss_fn(spike_rec, targets)
+    # loss = self.loss_fn(spike_rec, targets)
+    if isinstance(self.loss_fn, SF.ce_max_mem_loss):
+       loss = self.loss_fn(mem_rec, targets)
+    else:
+       loss = self.loss_fn(spike_rec, targets)
     self.log('val_loss', loss.item(), on_step=False, on_epoch=True, prog_bar=True)
 
     rate_acc = SF.accuracy_rate(spike_rec, targets)
@@ -97,15 +102,22 @@ class GestureRecognition(L.LightningModule):
 
     output = self.model(events)
     spike_rec = output['spike_rec']
+    mem_rec = output['mem_rec']
     probs = output['probs']
 
+    # loss = self.loss_fn(spike_rec, targets)
+    if isinstance(self.loss_fn, SF.ce_max_mem_loss):
+       loss = self.loss_fn(mem_rec, targets)
+    else:
+       loss = self.loss_fn(spike_rec, targets)
+    self.log('test_loss', loss.item(), on_step=False, on_epoch=True, prog_bar=True)
     rate_acc = SF.accuracy_rate(spike_rec, targets)
     self.log('test_rate_acc', rate_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     temporal_acc = SF.accuracy_temporal(spike_rec, targets)
     self.log('test_temp_acc', temporal_acc, on_step=False, on_epoch=True, prog_bar=True)
 
-    return {'test_rate_acc': rate_acc, 'test_temp_acc': temporal_acc}
+    return {'test_loss': loss, 'test_rate_acc': rate_acc, 'test_temp_acc': temporal_acc}
 
   def configure_optimizers(self):
     return optim.Adam(self.parameters(), lr=self.hparams.lr)

@@ -56,7 +56,8 @@ class Gesture3DCSNN(nn.Module):
       mem_rec.append(mem_out)
       utils.reset(self.classifier)
 
-    out = torch.stack(spike_rec)
-    probs = F.softmax(torch.sum(out, dim=0), dim=1)
+    out_spikes = torch.stack(spike_rec)
+    out_mems = torch.stack(mem_rec)
+    probs = F.softmax(torch.sum(out_spikes, dim=0), dim=1)
 
-    return {'spike_rec': out, 'mem_rec': mem_rec, 'probs': probs}
+    return {'spike_rec': out_spikes, 'mem_rec': out_mems, 'probs': probs}
