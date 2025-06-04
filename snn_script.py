@@ -306,6 +306,7 @@ def main():
             "test_temp_acc": [trainer.callback_metrics.get('test_temp_acc', 0.0)],
             "num_epochs": [num_epochs],
             "batch_size": [batch_size],
+            "loss": [loss],
         }
     )
     filename = "%s_params_and_outputs.csv"%(exp_name)
