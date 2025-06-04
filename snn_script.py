@@ -27,7 +27,7 @@ from tonic import DiskCachedDataset
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class GestureRecognition(L.LightningModule):
-  def __init__(self, lr, loss_fn, beta, spike_grad=surrogate.atan(), num_classes=11):
+  def __init__(self, lr, loss_fn, beta, num_classes=11):
     super().__init__()
     self.save_hyperparameters()
     self.model = Gesture3DCSNN(beta, num_classes).to(device)
@@ -42,11 +42,16 @@ class GestureRecognition(L.LightningModule):
 
     output = self.model(events)
     spike_rec = output['spike_rec']
+    mem_rec = output['mem_rec']
     probs = output['probs']
 
     print(f"Output dtype: {spike_rec.dtype}")  # Should be float32
     print(f"Targets dtype: {targets.dtype}")         # Should be int64 (long)
-    loss = self.loss_fn(spike_rec, targets)
+    # loss = self.loss_fn(spike_rec, targets)
+    if isinstance(self.loss_fn, SF.ce_max_mem_loss):
+       loss = self.loss_fn(mem_rec, targets)
+    else:
+       loss = self.loss_fn(spike_rec, targets)
     self.log('train_loss', loss.item(), on_step=True, on_epoch=True, prog_bar=True)
 
     return loss
@@ -168,9 +173,9 @@ def main():
     parser.add_argument(
        "--loss",
        type=str,
-       choices=["latency", "frequency"],
+       choices=["latency", "frequency", "count", "max_mem"],
        required=True,
-       help="The type of loss function the model should optimize: based either on spike timing (latency) or spike rate (frequency)"
+       help="The type of loss function the model should optimize: based either on spike count (count), spike timing (latency), spike rate (frequency), or max membrane potential (max_mem)"
     )
 
     parser.add_argument(
@@ -231,6 +236,10 @@ def main():
        loss_fn = SF.ce_temporal_loss()
     elif loss == "frequency":
        loss_fn = SF.ce_rate_loss()
+    elif loss == "count":
+       loss_fn = SF.ce_count_loss()
+    elif loss == "max_mem":
+       loss_fn = SF.ce_max_mem_loss()
     else:
        raise ValueError("Invalid loss function.")
 

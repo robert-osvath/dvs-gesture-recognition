@@ -48,13 +48,15 @@ class Gesture3DCSNN(nn.Module):
     # we need to get a final shape of [time_steps, batch_size, num_classes]
     # the loss function relies on spike counts over time steps, so we could iterate throught the time steps
     spike_rec = []
+    mem_rec = []
     time_steps = x.shape[0]
     for t in range(time_steps):
       spike_out, mem_out = self.classifier(x[t])
       spike_rec.append(spike_out)
+      mem_rec.append(mem_out)
       utils.reset(self.classifier)
 
     out = torch.stack(spike_rec)
     probs = F.softmax(torch.sum(out, dim=0), dim=1)
 
-    return {'spike_rec': out, 'probs': probs}
+    return {'spike_rec': out, 'mem_rec': mem_rec, 'probs': probs}
