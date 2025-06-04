@@ -239,7 +239,7 @@ def main():
     elif loss == "count":
        loss_fn = SF.ce_count_loss()
     elif loss == "max_mem":
-       loss_fn = SF.ce_max_mem_loss()
+       loss_fn = SF.ce_max_membrane_loss()
     else:
        raise ValueError("Invalid loss function.")
 
