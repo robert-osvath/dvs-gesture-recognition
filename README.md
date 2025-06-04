@@ -41,7 +41,7 @@ python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SI
 
 Created a new SNN model that uses 3d convolutions for feature extraction. <br>
 **!! You need to be much more careful with the batch sizes when training this model, as the LIF neurons take up a lot of memory. !!**
-**Also, you must specify the type of loss function you want the model to optimize, based either on: spike latency or spike frequency**
+**Also, you must specify the type of loss function you want the model to optimize, based either on: spike count (count) spike latency (latency), spike frequency (frequency) or max membrane potential (max_mem)**
 
 Command for the snn script:
 ```bash
