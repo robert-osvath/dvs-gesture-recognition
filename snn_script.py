@@ -48,7 +48,7 @@ class GestureRecognition(L.LightningModule):
     print(f"Output dtype: {spike_rec.dtype}")  # Should be float32
     print(f"Targets dtype: {targets.dtype}")         # Should be int64 (long)
     # loss = self.loss_fn(spike_rec, targets)
-    if isinstance(self.loss_fn, SF.ce_max_mem_loss):
+    if isinstance(self.loss_fn, SF.ce_max_membrane_loss):
        loss = self.loss_fn(mem_rec, targets)
     else:
        loss = self.loss_fn(spike_rec, targets)
@@ -191,6 +191,10 @@ def main():
     )
 
     parser.add_argument(
+        "--output-dir", type=str, default=".", help="Set the csv output dir.",
+    )
+    
+    parser.add_argument(
         "--beta", type=float, required=True, help="Set the beta value."
     )
 
@@ -216,6 +220,7 @@ def main():
     beta = args.beta
     exp_name = args.name
     batch_size = args.batch_size
+    output_dir = args.output_dir
 
     # Set the random seed
     L.seed_everything(random_seed, workers=True)
@@ -322,7 +327,7 @@ def main():
             "beta": [beta]
         }
     )
-    filename = "%s_params_and_outputs.csv"%(exp_name)
+    filename = "%s/%s_params_and_outputs.csv"%(output_dir,exp_name)
     file_exists = os.path.isfile(filename)
     df.to_csv(filename, mode="a", header=not file_exists, index=False)
 
