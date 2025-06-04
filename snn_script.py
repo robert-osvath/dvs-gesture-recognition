@@ -48,7 +48,7 @@ class GestureRecognition(L.LightningModule):
     print(f"Output dtype: {spike_rec.dtype}")  # Should be float32
     print(f"Targets dtype: {targets.dtype}")         # Should be int64 (long)
     # loss = self.loss_fn(spike_rec, targets)
-    if isinstance(self.loss_fn, SF.ce_max_mem_loss):
+    if isinstance(self.loss_fn, SF.ce_max_membrane_loss):
        loss = self.loss_fn(mem_rec, targets)
     else:
        loss = self.loss_fn(spike_rec, targets)
