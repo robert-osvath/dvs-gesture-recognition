@@ -44,10 +44,10 @@ spike_count,count,0.3,0.1,13,8,0,0,0.5227,0.4356,9,8,count,0.5
 spike_count,count,0.5,0.1,13,8,0,0,0.6515,0.5947,21,8,count,0.5
 spike_count,count,0.7,0.1,13,8,0,0,0.6856,0.6212,13,8,count,0.5
 spike_count,count,0.9,0.1,13,8,0,0,0.5568,0.5833,13,8,count,0.5
-timesurface,count,0.1,0.1,13,8,0,0,
-timesurface,count,0.3,0.1,13,8,0,0,
-timesurface,count,0.5,0.1,13,8,0,0,
-timesurface,count,0.7,0.1,13,8,0,0,
+timesurface,count,0.1,0.1,13,8,0,0,0.0909,0.0909,9,8,count,0.5
+timesurface,count,0.3,0.1,13,8,0,0,0.0909,0.0909,9,8,count,0.5
+timesurface,count,0.5,0.1,13,8,0,0,0.0909,0.0909,21,8,count,0.5
+timesurface,count,0.7,0.1,13,8,0,0,0.0985,0.0985,13,8,count,0.5
 timesurface,count,0.9,0.1,13,8,0,0,0.0909,0.0909,13,8,count,0.5
 n_bins,count,0.1,0.1,93,8,0,0,0.5417,0.4735,11,8,count,0.5
 n_bins,count,0.3,0.1,93,8,0,0,0.5758,0.5530,11,8,count,0.5
@@ -74,4 +74,4 @@ timesurface,count,0.3,0.1,93,8,0,0,0.0909,0.0909,11,8,count,0.5
 timesurface,count,0.5,0.1,93,8,0,0,0.0909,0.0909,13,8,count,0.5
 timesurface,count,0.7,0.1,93,8,0,0,0.1061,0.1061,21,8,count,0.5
 timesurface,count,0.9,0.1,93,8,0,0,0.0909,0.0909,25,8,count,0.5
-#Missing 4 values
+#Missing 0 values
