@@ -10,3 +10,4 @@ Pillow
 seaborn
 tensorboard
 snntorch
+aedat
