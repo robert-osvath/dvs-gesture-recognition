@@ -162,6 +162,10 @@ def main():
     parser.add_argument(
         "--name", type=str, required=True, help="Set the experiment name."
     )
+    
+    parser.add_argument(
+        "--output-dir", type=str, required=True, help="Set the output dir name."
+    )
 
     args = parser.parse_args()
     train_data_size = args.train_data_size
@@ -171,6 +175,7 @@ def main():
     max_epochs = args.max_epochs
     exp_name = args.name
     batch_size = args.batch_size
+    output_dir = args.output_dir
 
     # Set the random seed
     L.seed_everything(random_seed, workers=True)
@@ -262,9 +267,11 @@ def main():
             "batch_size": [batch_size],
         }
     )
-    filename = "%s_params_and_outputs.csv"%(exp_name)
+    filename = "%s/%s_params_and_outputs.csv"%(output_dir,exp_name)
     file_exists = os.path.isfile(filename)
-    df.to_csv(filename, mode="a", header=not file_exists, index=False)
+    #df.to_csv(filename, mode="a", header=not file_exists, index=False)
+    df.to_csv(filename, mode="w", header=True, index=False)
+
 
 
 if __name__ == "__main__":
