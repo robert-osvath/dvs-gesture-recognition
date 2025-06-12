@@ -18,8 +18,7 @@ from utils.pad_tensors import PadTensors
 import matplotlib.pyplot as plt
 import argparse
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+device = "gpu" if torch.cuda.is_available() else "cpu"
 
 class NWLASLDatasetTrain(Dataset):
   def __init__(self, train_path, transform=None):
@@ -272,7 +271,7 @@ def setup_trainers(max_epochs, patience, name, log_dir, checkpoint_dir):
   trainer_1 =  L.Trainer(
     max_epochs=20,
     check_val_every_n_epoch=2,
-    accelerator="gpu",
+    accelerator=device,
     devices="auto",
     precision="16-mixed",
     logger=L.loggers.TensorBoardLogger(save_dir=log_dir, version=name),
@@ -288,7 +287,7 @@ def setup_trainers(max_epochs, patience, name, log_dir, checkpoint_dir):
   trainer_2 =  L.Trainer(
     max_epochs=20,
     check_val_every_n_epoch=2,
-    accelerator="gpu",
+    accelerator=device,
     devices="auto",
     precision="16-mixed",
     logger=L.loggers.TensorBoardLogger(save_dir=log_dir, version=name),
