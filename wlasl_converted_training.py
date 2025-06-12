@@ -4,7 +4,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-import torchvision.transforms.v2 as T
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, Dataset, Subset
 from tqdm import tqdm
@@ -23,7 +22,7 @@ import argparse
 sensor_size = (128, 128, 2)
 transform = TT.ToFrame(sensor_size=sensor_size, time_window=10000)
 
-device = "gpu" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class NWLASLDataset(Dataset):
   def __init__(self, base_path, transform=None):
