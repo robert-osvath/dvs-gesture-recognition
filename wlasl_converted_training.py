@@ -155,7 +155,7 @@ transform_1 = TT.Compose([
 ])
 
 transform_2 = TT.Compose([
-    TT.DropEvent(p=1/3)
+    TT.DropEvent(p=1/3),
     TT.ToFrame(sensor_size=(128, 128, 2), time_window=10000),
     NormalizeEventTensor()
 ])
