@@ -337,7 +337,7 @@ if __name__=="__main__":
 
   train_dir = os.path.join(data_dir, "train")
   val_dir = os.path.join(data_dir, "val")
-  test_dir = os.path.join(data_dir, "test_dir")
+  test_dir = os.path.join(data_dir, "test")
 
   train_dataset = NWLASLDatasetTrain(train_dir, transform=transform_1)
   val_dataset = NWLASLDatasetVal(val_dir, transform=transform_1)
