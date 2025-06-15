@@ -69,9 +69,9 @@ spike_count,count,0.3,0.1,93,8,0,0,0.3750,0.3902,11,8,count,0.9
 spike_count,count,0.5,0.1,93,8,0,0,0.5152,0.4848,13,8,count,0.9
 spike_count,count,0.7,0.1,93,8,0,0,0.5909,0.5606,21,8,count,0.9
 spike_count,count,0.9,0.1,93,8,0,0,0.6591,0.6326,25,8,count,0.9
-timesurface,count,0.1,0.1,93,8,0,0,
-timesurface,count,0.3,0.1,93,8,0,0,
-timesurface,count,0.5,0.1,93,8,0,0,
-timesurface,count,0.7,0.1,93,8,0,0,
-timesurface,count,0.9,0.1,93,8,0,0,
-#Missing 5 values
+timesurface,count,0.1,0.1,93,8,0,0,0.0909,0.0909,11,8,count,0.9
+timesurface,count,0.3,0.1,93,8,0,0,0.0909,0.0909,11,8,count,0.9
+timesurface,count,0.5,0.1,93,8,0,0,0.0909,0.0909,13,8,count,0.9
+timesurface,count,0.7,0.1,93,8,0,0,0.1061,0.1061,21,8,count,0.9
+timesurface,count,0.9,0.1,93,8,0,0,0.0909,0.0909,25,8,count,0.9
+#Missing 0 values

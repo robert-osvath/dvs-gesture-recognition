@@ -13,7 +13,7 @@ n_bins,max_mem,0.9,0.1,93,8,0,0,0.8333,0.7765,15,8,max_mem,0.9
 binary,max_mem,0.9,0.1,93,8,0,0,0.0909,0.0909,15,8,max_mem,0.9
 time_window,max_mem,0.9,0.1,93,8,0,0,0.3636,0.3712,15,8,max_mem,0.9
 spike_count,max_mem,0.9,0.1,93,8,0,0,0.5076,0.5114,15,8,max_mem,0.9
-timesurface,max_mem,0.9,0.1,93,8,0,0,
+timesurface,max_mem,0.9,0.1,93,8,0,0,0.0909,0.0909,15,8,max_mem,0.9
 n_bins,max_mem,0.9,0.1,45,8,0,0,0.8371,0.8030,19,8,max_mem,0.9
 binary,max_mem,0.9,0.1,45,8,0,0,0.0909,0.0909,19,8,max_mem,0.9
 time_window,max_mem,0.9,0.1,45,8,0,0,0.4432,0.4356,19,8,max_mem,0.9
@@ -44,4 +44,4 @@ binary,max_mem,0.9,0.1,44,8,0,0,0.1098,0.1174,21,8,max_mem,0.9
 time_window,max_mem,0.9,0.1,44,8,0,0,0.3826,0.4356,21,8,max_mem,0.9
 spike_count,max_mem,0.9,0.1,44,8,0,0,0.0,0.0,5,8,max_mem,0.9
 timesurface,max_mem,0.9,0.1,44,8,0,0,
-#Missing 2 values
+#Missing 1 values
