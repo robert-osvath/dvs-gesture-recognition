@@ -290,7 +290,7 @@ def main():
 
     train_loader = DataLoader(cached_train_set, batch_size=batch_size, collate_fn=tonic.collation.PadTensors(batch_first=True), shuffle=True, num_workers=32)
     val_loader = DataLoader(cached_val_set, batch_size=batch_size, collate_fn=tonic.collation.PadTensors(batch_first=True), shuffle=False, num_workers=32)
-    test_loader = DataLoader(test_data, batch_size=batch_size, collate_fn=tonic.collation.PadTensors(batch_first=True), shuffle=False, num_workers=32)
+    test_loader = DataLoader(test_data, batch_size=batch_size, collate_fn=tonic.collation.PadTensors(batch_first=True), shuffle=False)
 
     # Create the model
     model = GestureRecognition(lr=0.001, loss_fn=loss_fn, beta=beta)
