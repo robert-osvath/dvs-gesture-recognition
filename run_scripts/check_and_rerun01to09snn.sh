@@ -13,7 +13,7 @@ do
 			if [ -z $res ]
 			then
 				echo \#Missing ${repr}_${coding}_${size}_${seed}_${batch} 
-				echo python3 snn_script.py --loss ${coding} --train-data-size ${size} --val-data-size 0.1 --random-seed $seed --representation ${repr} --max-epochs 100 --name ${repr}_${coding}_${size}_${seed}_${batch} --batch-size ${batch} --beta 0.5 --output-dir=${folder}
+				echo python3 snn_script.py --loss ${coding} --train-data-size ${size} --val-data-size 0.1 --random-seed $seed --representation ${repr} --max-epochs 100 --name ${repr}_${coding}_${size}_${seed}_${batch} --batch-size ${batch} --beta 0.5 --output-dir ${folder}
 				count=$(($count+1))
 			else
 				echo \#OK ${repr}_${coding}_${size}_${seed}_${batch} 
