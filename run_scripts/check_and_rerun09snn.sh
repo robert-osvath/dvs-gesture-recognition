@@ -3,7 +3,7 @@ coding=${2:-latency}
 folder=${3:-.}
 beta=${4:-0.5}
 count=0
-for seed in 42 13 93 #45 96 6 98 59 44
+for seed in 42 13 93 45 96 6 98 59 44
 do
 	for repr in n_bins binary time_window spike_count timesurface
 	do
