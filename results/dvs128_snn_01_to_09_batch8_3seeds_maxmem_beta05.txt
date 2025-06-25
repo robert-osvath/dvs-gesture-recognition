@@ -1,4 +1,4 @@
-representation,coding,train_size,val_size,seed,bach_size,,,train_acc,val_acc,test_acc,epoch,loss=representation,beta
+representation,coding,train_size,val_size,seed,batch_size,val_rate_acc,val_temp_acc,test_rate_acc,test_temp_acc,epoch,batch_size,loss,beta
 n_bins,max_mem,0.1,0.1,42,8,0,0,0.5265,0.5341,17,8,max_mem,0.5
 n_bins,max_mem,0.3,0.1,42,8,0,0,0.6553,0.6023,23,8,max_mem,0.5
 n_bins,max_mem,0.5,0.1,42,8,0,0,0.7992,0.7424,21,8,max_mem,0.5

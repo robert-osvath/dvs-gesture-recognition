@@ -1,4 +1,4 @@
-representation,coding,train_size,val_size,seed,bach_size,,,train_acc,val_acc,test_acc,epoch,loss=representation,beta
+representation,coding,train_size,val_size,seed,bach_size,val_rate_acc,val_temp_acc,test_rate_acc,test_temp_acc,epoch,batch_size,loss,beta
 n_bins,latency,0.1,0.1,42,8,0,0,0.4167,0.3977,11,8,latency,0.5
 n_bins,latency,0.3,0.1,42,8,0,0,0.6629,0.6402,23,8,latency,0.5
 n_bins,latency,0.5,0.1,42,8,0,0,0.7348,0.6932,13,8,latency,0.5

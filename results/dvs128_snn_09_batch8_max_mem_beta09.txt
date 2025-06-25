@@ -1,4 +1,4 @@
-representation,coding,train_size,val_size,seed,bach_size,,,train_acc,val_acc,test_acc,epoch,loss=representation,beta
+representation,loss,train_size,val_size,random_seed,batch_size,val_rate_acc,val_temp_acc,test_rate_acc,test_temp_acc,num_epochs,batch_size,loss,beta
 n_bins,max_mem,0.9,0.1,42,8,0,0,0.8333,0.7992,19,8,max_mem,0.9
 binary,max_mem,0.9,0.1,42,8,0,0,0.2045,0.2159,19,8,max_mem,0.9
 time_window,max_mem,0.9,0.1,42,8,0,0,0.4318,0.3977,19,8,max_mem,0.9
@@ -43,5 +43,3 @@ n_bins,max_mem,0.9,0.1,44,8,0,0,0.8182,0.7879,21,8,max_mem,0.9
 binary,max_mem,0.9,0.1,44,8,0,0,0.1098,0.1174,21,8,max_mem,0.9
 time_window,max_mem,0.9,0.1,44,8,0,0,0.3826,0.4356,21,8,max_mem,0.9
 spike_count,max_mem,0.9,0.1,44,8,0,0,0.0,0.0,5,8,max_mem,0.9
-timesurface,max_mem,0.9,0.1,44,8,0,0,
-#Missing 4 values

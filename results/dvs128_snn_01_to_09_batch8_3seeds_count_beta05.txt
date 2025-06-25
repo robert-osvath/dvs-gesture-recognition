@@ -1,4 +1,4 @@
-representation,coding,train_size,val_size,seed,bach_size,,,train_acc,val_acc,test_acc,epoch,loss=representation,beta
+representation,coding,train_size,val_size,seed,batch_size,val_rate_acc,val_temp_acc,test_rate_acc,test_temp_acc,epoch,batch_size,loss,beta
 n_bins,count,0.1,0.1,42,8,0,0,0.5152,0.4773,11,8,count,0.5
 n_bins,count,0.3,0.1,42,8,0,0,0.5871,0.5303,9,8,count,0.5
 n_bins,count,0.5,0.1,42,8,0,0,0.8068,0.6591,23,8,count,0.5

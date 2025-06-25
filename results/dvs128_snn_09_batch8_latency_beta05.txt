@@ -1,4 +1,4 @@
-representation,coding,train_size,val_size,seed,bach_size,,,train_acc,val_acc,test_acc,epoch,loss=representation,beta
+representation,loss,train_size,val_size,random_seed,batch_size,val_rate_acc,val_temp_acc,test_rate_acc,test_temp_acc,num_epochs,batch_size,loss,beta
 n_bins,latency,0.9,0.1,42,8,0,0,0.7462,0.7083,13,8,latency,0.5
 binary,latency,0.9,0.1,42,8,0,0,0.0909,0.0909,13,8,latency,0.5
 time_window,latency,0.9,0.1,42,8,0,0,0.2841,0.2689,13,8,latency,0.5
@@ -44,4 +44,3 @@ binary,latency,0.9,0.1,44,8,0,0,
 time_window,latency,0.9,0.1,44,8,0,0,
 spike_count,latency,0.9,0.1,44,8,0,0,
 timesurface,latency,0.9,0.1,44,8,0,0,
-#Missing 23 values
