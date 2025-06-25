@@ -18,10 +18,11 @@ n_bins,latency,0.9,0.1,45,8,0,0,0.7992,0.7917,17,8,latency,0.5
 binary,latency,0.9,0.1,45,8,0,0,0.0909,0.0909,17,8,latency,0.5
 time_window,latency,0.9,0.1,45,8,0,0,0.1402,0.1364,17,8,latency,0.5
 spike_count,latency,0.9,0.1,45,8,0,0,0.2803,0.2727,17,8,latency,0.5
-timesurface,latency,0.9,0.1,45,8,0,0,
+timesurface,latency,0.9,0.1,45,8,0,0,0.0909,0.0909,17,8,latency,0.5
 n_bins,latency,0.9,0.1,96,8,0,0,0.8598,0.7992,27,8,latency,0.5
 binary,latency,0.9,0.1,96,8,0,0,0.0909,0.0909,27,8,latency,0.5
 time_window,latency,0.9,0.1,96,8,0,0,0.2689,0.2765,27,8,latency,0.5
+<<<<<<< HEAD
 spike_count,latency,0.9,0.1,96,8,0,0,
 timesurface,latency,0.9,0.1,96,8,0,0,
 n_bins,latency,0.9,0.1,6,8,0,0,
@@ -44,3 +45,28 @@ binary,latency,0.9,0.1,44,8,0,0,
 time_window,latency,0.9,0.1,44,8,0,0,
 spike_count,latency,0.9,0.1,44,8,0,0,
 timesurface,latency,0.9,0.1,44,8,0,0,
+=======
+spike_count,latency,0.9,0.1,96,8,0,0,0.4508,0.4394,27,8,latency,0.5
+timesurface,latency,0.9,0.1,96,8,0,0,0.0909,0.0909,27,8,latency,0.5
+n_bins,latency,0.9,0.1,6,8,0,0,0.8030,0.7841,17,8,latency,0.5
+binary,latency,0.9,0.1,6,8,0,0,0.0909,0.0909,17,8,latency,0.5
+time_window,latency,0.9,0.1,6,8,0,0,0.2235,0.2386,17,8,latency,0.5
+spike_count,latency,0.9,0.1,6,8,0,0,0.2955,0.2917,17,8,latency,0.5
+timesurface,latency,0.9,0.1,6,8,0,0,0.0909,0.0909,17,8,latency,0.5
+n_bins,latency,0.9,0.1,98,8,0,0,0.7955,0.7765,21,8,latency,0.5
+binary,latency,0.9,0.1,98,8,0,0,0.0909,0.0909,21,8,latency,0.5
+time_window,latency,0.9,0.1,98,8,0,0,0.2917,0.2955,21,8,latency,0.5
+spike_count,latency,0.9,0.1,98,8,0,0,0.3902,0.3864,21,8,latency,0.5
+timesurface,latency,0.9,0.1,98,8,0,0,0.0909,0.0909,21,8,latency,0.5
+n_bins,latency,0.9,0.1,59,8,0,0,0.7955,0.7348,15,8,latency,0.5
+binary,latency,0.9,0.1,59,8,0,0,0.0909,0.0909,15,8,latency,0.5
+time_window,latency,0.9,0.1,59,8,0,0,0.3371,0.3333,15,8,latency,0.5
+spike_count,latency,0.9,0.1,59,8,0,0,0.4773,0.4735,15,8,latency,0.5
+timesurface,latency,0.9,0.1,59,8,0,0,0.0909,0.0909,15,8,latency,0.5
+n_bins,latency,0.9,0.1,44,8,0,0,0.7500,0.7083,21,8,latency,0.5
+binary,latency,0.9,0.1,44,8,0,0,0.0909,0.0909,21,8,latency,0.5
+time_window,latency,0.9,0.1,44,8,0,0,0.2462,0.2424,21,8,latency,0.5
+spike_count,latency,0.9,0.1,44,8,0,0,0.3447,0.3258,21,8,latency,0.5
+timesurface,latency,0.9,0.1,44,8,0,0,0.0909,0.0909,17,8,latency,0.5
+#Missing 0 values
+>>>>>>> 1782bf8e29d1f92974744e36c507683931bb001e
