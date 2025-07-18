@@ -22,10 +22,10 @@ from utils.pad_tensors import PadTensors
 device = "gpu" if torch.cuda.is_available() else "cpu"
 
 class GestureRecognition(L.LightningModule):
-    def __init__(self, lr, num_classes=11):
+    def __init__(self, lr, conv_layers, num_classes=11):
         super().__init__()
         self.save_hyperparameters()
-        self.model = Gesture3DConvNet_v2(num_classes)
+        self.model = Gesture3DConvNet_v2(num_classes, conv_layers)
         self.loss = nn.CrossEntropyLoss()
         self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
@@ -144,6 +144,10 @@ def main():
     )
 
     parser.add_argument(
+        "--conv-layers", type=int, required=True, help="Set the number of convolutional layers."
+    )
+
+    parser.add_argument(
         "--representation",
         type=str,
         choices=["n_bins", "binary", "time_window", "spike_count", "timesurface"],
@@ -171,6 +175,7 @@ def main():
     train_data_size = args.train_data_size
     val_data_size = args.val_data_size
     random_seed = args.random_seed
+    conv_layers = args.conv_layers
     representation = args.representation
     max_epochs = args.max_epochs
     exp_name = args.name

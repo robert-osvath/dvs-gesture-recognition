@@ -3,15 +3,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Gesture3DConvNet_v2(nn.Module):
-    def __init__(self, classes):
+    def __init__(self, classes, nr_conv_layers):
         super(Gesture3DConvNet_v2, self).__init__()
-        self.conv1 = self._make_conv_layer(2, 8)
-        self.conv2 = self._make_conv_layer(8, 16)
-        self.conv3 = self._make_conv_layer(16, 32)
+        self.conv_layers = nn.ModuleList()
+
+        for i in range(1, nr_conv_layers + 1):
+            in_channels = 2 ** i
+            out_channels = 2 ** (i + 1)
+            self.conv_layers.append(self._make_conv_layer(in_channels, out_channels))
+
+        final_output_channels = 2 ** (nr_conv_layers + 1)
 
         self.adaptive_pool = nn.AdaptiveAvgPool3d((12, 16, 16))
 
-        self.fc1 = nn.Linear(32 * 12 * 16 * 16, 128)
+        self.fc1 = nn.Linear(final_output_channels * 12 * 16 * 16, 128)
         self.fc2 = nn.Linear(128, classes)
 
     def _make_conv_layer(self, in_channels, out_channels):
@@ -22,9 +27,8 @@ class Gesture3DConvNet_v2(nn.Module):
         )
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
+        for conv_layer in self.conv_layers:
+            x = conv_layer(x)
         x = self.adaptive_pool(x)
         x = x.view(x.size(0), -1)
         x = F.relu(self.fc1(x))
