@@ -12,12 +12,12 @@ import os
 import seaborn as sns
 from torch.utils.tensorboard import SummaryWriter
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
-from new_model import Gesture3DConvNet_v2
-from dataset import DVSGestureData
+from models.cnn.new_model import Gesture3DConvNet_v2
+from dataset.dataset import DVSGestureData
 import argparse
 import os
 import pandas as pd
-from utils.pad_tensors import PadTensors 
+from utils.pad_tensors import PadTensors
 
 device = "gpu" if torch.cuda.is_available() else "cpu"
 
@@ -108,7 +108,7 @@ def train_setup(max_epochs, patience, log_dir):
         logger=L.loggers.TensorBoardLogger(log_dir, name="gesture_recognition"),
         log_every_n_steps=1,
         callbacks=[early_stopping],
-        default_root_dir="./checkpoints",
+        default_root_dir="../checkpoints",
     )
 
     return trainer
@@ -241,7 +241,7 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=PadTensors())
 
     # Create the model
-    model = GestureRecognition(1e-3)
+    model = GestureRecognition(1e-3, conv_layers)
 
     # Alternatively, you can load the model from a checkpoint
     # model = GestureRecognition.load_from_checkpoint("checkpoints/a.ckpt")

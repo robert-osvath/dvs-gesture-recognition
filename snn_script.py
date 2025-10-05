@@ -12,8 +12,8 @@ import os
 import seaborn as sns
 from torch.utils.tensorboard import SummaryWriter
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
-from snn_model import Gesture3DCSNN
-from dataset import DVSGestureData
+from models.snn.snn_model import Gesture3DCSNN
+from dataset.dataset import DVSGestureData
 import argparse
 import os
 import pandas as pd

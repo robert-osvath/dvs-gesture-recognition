@@ -12,51 +12,46 @@ import os
 import seaborn as sns
 from torch.utils.tensorboard import SummaryWriter
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
-from model import Gesture3DConvNet
-from dataset import DVSGestureData
+from models.resnet.resnet import ResNet3D
+from dataset.dataset import DVSGestureData
 import argparse
 import os
 import pandas as pd
+from utils.pad_tensors import PadTensors
 
 device = "gpu" if torch.cuda.is_available() else "cpu"
 
-
-class GestureRecognition(L.LightningModule):
-    def __init__(self, lr, input_shape, num_classes=11):
+class ResNet3DModule(L.LightningModule):
+    def __init__(self, num_blocks, lr=1e-3, num_classes=11):
         super().__init__()
-        self.save_hyperparameters()
-        self.model = Gesture3DConvNet(input_shape, num_classes)
+        self.model = ResNet3D(num_blocks, num_classes)
         self.loss = nn.CrossEntropyLoss()
         self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.test_acc = Accuracy(task="multiclass", num_classes=num_classes)
-        self.confusion_matrix = ConfusionMatrix(
-            task="multiclass", num_classes=num_classes
-        )
+        self.confusion_matrix = ConfusionMatrix(task="multiclass", num_classes=num_classes)
+        self.save_hyperparameters()
 
     def training_step(self, batch, batch_idx):
-        events, targets = batch
+        events, target = batch
         output = self.model(events)
-        loss = self.loss(output["logits"], targets)
-        accuracy = self.train_acc(output["probs"], targets)
-        self.log("train_loss", loss.item(), on_step=True, on_epoch=True, prog_bar=True)
-        self.log("train_acc", accuracy, on_step=True, on_epoch=True, prog_bar=True)
-
+        loss = self.loss(output["logits"], target)
+        self.train_acc(output["probs"], target)
+        self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('train_acc', self.train_acc, on_step=True, on_epoch=True, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        events, targets = batch
+        events, target = batch
         output = self.model(events)
-        loss = self.loss(output["logits"], targets)
-        self.log("val_loss", loss.item(), on_step=False, on_epoch=True, prog_bar=True)
-
-        accuracy = self.val_acc(output["probs"], targets)
-        self.log("val_acc", accuracy, on_step=False, on_epoch=True, prog_bar=True)
+        loss = self.loss(output["logits"], target)
+        self.val_acc(output["probs"], target)
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('val_acc', self.val_acc, on_step=True, on_epoch=True, prog_bar=True)
 
         preds = torch.argmax(output["probs"], dim=1)
-        self.confusion_matrix(preds, targets)
-
-        return {"val_loss": loss, "val_acc": accuracy}
+        self.confusion_matrix(preds, target)
+        return loss
 
     def on_validation_epoch_end(self):
         cm = self.confusion_matrix.compute().cpu().numpy()
@@ -73,26 +68,17 @@ class GestureRecognition(L.LightningModule):
         self.confusion_matrix.reset()
 
     def test_step(self, batch, batch_idx):
-        events, targets = batch
+        events, target = batch
         output = self.model(events)
-        loss = self.loss(output["logits"], targets)
-
-        accuracy = self.test_acc(output["probs"], targets)
-
-        self.log("test_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("test_acc", accuracy, on_step=False, on_epoch=True, prog_bar=True)
-
-        return {"test_loss": loss, "test_acc": accuracy}
-
-    def predict_step(self, batch, batch_idx):
-        events, _ = batch
-        output = self.model(events)
-        return torch.argmax(output["probs"], dim=1)
+        loss = self.loss(output["logits"], target)
+        self.test_acc(output["probs"], target)
+        self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('test_acc', self.test_acc, on_step=True, on_epoch=True, prog_bar=True)
+        return loss
 
     def configure_optimizers(self):
         return optim.Adam(self.parameters(), lr=self.hparams.lr)
-
-
+    
 def train_setup(max_epochs, patience, log_dir):
     # Set up the early stopping callback
     early_stopping = EarlyStopping(
@@ -109,11 +95,10 @@ def train_setup(max_epochs, patience, log_dir):
         logger=L.loggers.TensorBoardLogger(log_dir, name="gesture_recognition"),
         log_every_n_steps=1,
         callbacks=[early_stopping],
-        default_root_dir="./checkpoints",
+        default_root_dir="../checkpoints",
     )
 
     return trainer
-
 
 def train(model, train_loader, val_loader, trainer):
     trainer.fit(model, train_loader, val_loader)
@@ -121,7 +106,6 @@ def train(model, train_loader, val_loader, trainer):
 
 def test(model, test_loader, trainer):
     trainer.test(model, test_loader)
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -146,9 +130,13 @@ def main():
     )
 
     parser.add_argument(
+        "--num-blocks", type=int, required=True, help="Set the number of residual blocks."
+    )
+
+    parser.add_argument(
         "--representation",
         type=str,
-        choices=["n_bins", "binary"],
+        choices=["n_bins", "binary", "time_window", "spike_count", "timesurface"],
         required=True,
         help="The event representation of the DVS data to use.",
     )
@@ -158,25 +146,26 @@ def main():
     )
 
     parser.add_argument(
-        "--batch-size", type=int, required=True, help="Set the max epochs."
+        "--batch-size", type=int, default=10, help="Set the batch size."
     )
 
     parser.add_argument(
-        "--name", type=str, required=True, help="set the exp name."
+        "--name", type=str, required=True, help="Set the experiment name."
     )
     
     parser.add_argument(
-        "--output-dir", type=str, required=True, help="set the output folder"
+        "--output-dir", type=str, required=True, help="Set the output dir name."
     )
 
     args = parser.parse_args()
     train_data_size = args.train_data_size
     val_data_size = args.val_data_size
     random_seed = args.random_seed
+    num_blocks = args.num_blocks
     representation = args.representation
     max_epochs = args.max_epochs
-    batch_size = args.batch_size
     exp_name = args.name
+    batch_size = args.batch_size
     output_dir = args.output_dir
 
     # Set the random seed
@@ -193,6 +182,16 @@ def main():
                 TT.ToBinaRep(n_frames=100, n_bits=2),
             ]
         )
+    elif representation == "time_window":
+        transform = TT.ToFrame(sensor_size=sensor_size, time_window=10000)
+    elif representation == "spike_count":
+        transform = TT.ToFrame(sensor_size=sensor_size, event_count=1000)
+    elif representation == "timesurface":
+        transform = TT.ToTimesurface(
+            sensor_size=sensor_size, 
+            tau=30000,
+            dt = 10000
+        )
     else:
         raise ValueError("Invalid representation.")
 
@@ -202,10 +201,7 @@ def main():
 
     # Load the datasets
     print("splitting with ",train_data_size,val_data_size,1-train_data_size-val_data_size)
-    #train_folder="./data_%d_%d"%(round(train_data_size)*100,seed)
-    #test_folder="./data_test"
 
-    #if !os.path.isdir(train_folder):
     train_data, val_data, _ = random_split(
         tonic.datasets.DVSGesture(save_to=("./data"), train=True, transform=transform),
         [train_data_size, val_data_size, round((1 - train_data_size - val_data_size)*100)/100],
@@ -220,21 +216,12 @@ def main():
     val_dataset = DVSGestureData(val_data)
     test_dataset = DVSGestureData(test_data)
 
-    # Create the data loaders
-    # !! Make sure to change num_workers accordingly !!
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4)
-    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=PadTensors())
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=PadTensors())
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=PadTensors())
 
-    # Get the input shape
-    events, _ = next(iter(train_loader))
-    input_shape = events.shape[1:]
-
-    # Create the model
-    model = GestureRecognition(1e-3, input_shape)
-
-    # Alternatively, you can load the model from a checkpoint
-    # model = GestureRecognition.load_from_checkpoint("checkpoints/a.ckpt")
+    #Create the model
+    model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=11)
 
     # Create the trainer
     trainer = train_setup(max_epochs=max_epochs, patience=2, log_dir="./logs")
@@ -259,7 +246,8 @@ def main():
             "val_acc": [model.val_acc.compute().item()],
             "test_acc": [model.test_acc.compute().item()],
             "num_epochs": [num_epochs],
-            "batch_size": [batch_size]
+            "batch_size": [batch_size],
+            "num_blocks": [num_blocks],
         }
     )
     filename = "%s/%s_params_and_outputs.csv"%(output_dir,exp_name)
