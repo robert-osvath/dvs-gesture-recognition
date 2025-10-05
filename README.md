@@ -21,23 +21,21 @@ python3 script.py --train-data-size 0.9 --val-data-size 0.1 --random-seed 42 --r
 python3 script.py --train-data-size 0.9 --val-data-size 0.1 --random-seed 42 --representation binary --max-epochs 100 --name binary_09_42
 ```
 
-## New extended script with added representations of time window, spike count and timesurface
-
-Updates:
-
-* Created extended_script.py with new representations of time_window, spike_count and timesurface
-* Added the batch size as a new script parameter
-* Modified the original model in new_model.py to handle data with different temporal dimensions
-    * Instead of inferring the size of the tensors at the initialization of the model, I added an adaptive 3d pooling layer after the final convolution to reshape the data to the same size
-    * This won't affect the representations with constant temporal dimensions (n_bins, binary), since I designed the adaptive pooling layer with the idea to have the final features before classification stay the same for these representations, so we don't have to redo the experiments for these
-* Added a padding function in /utils for batching the tensors with different temporal dimensions in the dataloaders
+## Extended script with added representations of time window, spike count and timesurface
 
 Command for updated script:
 ```bash
-python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE]
+python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --conv-layers [CONV_LAYERS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --output-dir [OUTPUT_DIR]
 ```
 
-## New script to train a 3d Convolutional Spiking Neural Network model
+## Script to train a ResNet model with 
+
+Command:
+```bash 
+python resnet_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --num-blocks [NUM_RESIDUAL_BLOCKS] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --output-dir [OUTPUT_DIR]
+```
+
+## Script to train a 3d Convolutional Spiking Neural Network model
 
 Created a new SNN model that uses 3d convolutions for feature extraction. <br>
 **!! You need to be much more careful with the batch sizes when training this model, as the LIF neurons take up a lot of memory. !!**
@@ -45,5 +43,5 @@ Created a new SNN model that uses 3d convolutions for feature extraction. <br>
 
 Command for the snn script:
 ```bash
-python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --loss [LOSS_FN] --beta [BETA] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE]
+python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --loss [LOSS_FN] --beta [BETA] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --output-dir [OUTPUT_DIR]
 ```
