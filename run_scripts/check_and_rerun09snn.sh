@@ -7,7 +7,7 @@ for seed in 42 13 93 45 96 6 98 59 44
 do
 	for repr in n_bins binary time_window spike_count timesurface
 	do
-		for size in 0.1 0.3 0.5 0.7 0.9 
+		for size in 0.9 
 		#for size in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 
 		do
 			res=`find ${folder} | grep ${repr}_${coding}_${size}_${seed}_${batch}`

@@ -21,6 +21,8 @@ from utils.pad_tensors import PadTensors
 
 device = "gpu" if torch.cuda.is_available() else "cpu"
 
+print ("Running on device %s"%device)
+
 class ResNet3DModule(L.LightningModule):
     def __init__(self, num_blocks, lr=1e-3, num_classes=11):
         super().__init__()
@@ -168,6 +170,8 @@ def main():
     batch_size = args.batch_size
     output_dir = args.output_dir
 
+    print("Preparing to save results to %s"%output_dir)
+
     # Set the random seed
     L.seed_everything(random_seed, workers=True)
 
@@ -229,6 +233,11 @@ def main():
     # Train the model
     train(model, train_loader, val_loader, trainer)
 
+    print(trainer.logged_metrics)
+    train_acc = trainer.logged_metrics["train_acc_step"].item()
+    #val_acc = trainer.logged_metrics["val_acc_step"].item()
+    val_acc = 0
+
     # Test the model
     test(model, test_loader, trainer)
 
@@ -242,8 +251,8 @@ def main():
             "val_data_size": [val_data_size],
             "random_seed": [random_seed],
             "representation": [representation],
-            "train_acc": [trainer.callback_metrics["train_acc"].item()],
-            "val_acc": [trainer.callback_metrics["val_acc"].item()],
+            "train_acc": train_acc,
+            "val_acc": val_acc,
             "test_acc": [trainer.callback_metrics["test_acc"].item()],
             "num_epochs": [num_epochs],
             "batch_size": [batch_size],
@@ -252,7 +261,10 @@ def main():
     )
     filename = "%s/%s_params_and_outputs.csv"%(output_dir,exp_name)
     file_exists = os.path.isfile(filename)
+
+    print ("Saving data to %s"%filename)
     #df.to_csv(filename, mode="a", header=not file_exists, index=False)
+
     df.to_csv(filename, mode="w", header=True, index=False)
 
 
