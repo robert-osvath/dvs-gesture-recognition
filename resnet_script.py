@@ -34,8 +34,6 @@ class ResNet3DModule(L.LightningModule):
         self.test_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.confusion_matrix = ConfusionMatrix(task="multiclass", num_classes=num_classes)
         self.save_hyperparameters()
-        self.val_acc_gen=0
-        self.val_acc_curr=0
 
     def training_step(self, batch, batch_idx):
         events, target = batch
@@ -43,7 +41,7 @@ class ResNet3DModule(L.LightningModule):
         loss = self.loss(output["logits"], target)
         self.train_acc(output["probs"], target)
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log('train_acc', self.train_acc, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('train_acc', self.train_acc, on_step=False, on_epoch=True, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -52,7 +50,7 @@ class ResNet3DModule(L.LightningModule):
         loss = self.loss(output["logits"], target)
         self.val_acc(output["probs"], target)
         self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log('val_acc', self.val_acc, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('val_acc', self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
 
         preds = torch.argmax(output["probs"], dim=1)
@@ -70,9 +68,6 @@ class ResNet3DModule(L.LightningModule):
         writer = SummaryWriter(log_dir=self.logger.log_dir)
         writer.add_figure("Confusion Matrix", fig, global_step=self.current_epoch)
         writer.close()
-
-        self.val_acc_curr=self.val_acc.compute().item()
-        self.val_acc_gen=self.val_acc_curr if self.val_acc_curr>self.val_acc_gen else self.val_acc_gen
 
         self.confusion_matrix.reset()
 
@@ -206,7 +201,7 @@ def main():
         transform = TT.ToTimesurface(
             sensor_size=sensor_size, 
             tau=30000,
-            dt = 10000
+            dt=10000
         )
     else:
         raise ValueError("Invalid representation.")
@@ -245,11 +240,6 @@ def main():
     # Train the model
     train(model, train_loader, val_loader, trainer)
 
-    print(trainer.logged_metrics)
-    print(trainer.callback_metrics)
-    train_acc = trainer.logged_metrics["train_acc_step"].item()
-    #val_acc = trainer.logged_metrics["val_acc_step"].item()
-
     # Test the model
     test(model, test_loader, trainer)
 
@@ -263,8 +253,8 @@ def main():
             "val_data_size": [val_data_size],
             "random_seed": [random_seed],
             "representation": [representation],
-            "train_acc": train_acc,
-            "val_acc": model.val_acc_gen,
+            "train_acc": [trainer.callback_metrics["train_acc"].item()],
+            "val_acc": [trainer.callback_metrics["val_acc"].item()],
             "test_acc": [trainer.callback_metrics["test_acc"].item()],
             "num_epochs": [num_epochs],
             "batch_size": [batch_size],
