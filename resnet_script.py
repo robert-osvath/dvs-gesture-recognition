@@ -13,7 +13,7 @@ import seaborn as sns
 from torch.utils.tensorboard import SummaryWriter
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 from models.resnet.resnet import ResNet3D
-from dataset.dataset import DVSGestureData
+from dataset.dataset import DVSGestureData, CachedDVSGestureData
 import argparse
 import os
 import pandas as pd
@@ -223,8 +223,8 @@ def main():
     )
 
     # Create the transformed datasets
-    train_dataset = DVSGestureData(train_data)
-    val_dataset = DVSGestureData(val_data)
+    train_dataset = CachedDVSGestureData(train_data, cache_path='./cache/train')
+    val_dataset = CachedDVSGestureData(val_data, cache_path='./cache/val')
     test_dataset = DVSGestureData(test_data)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=PadTensors())
