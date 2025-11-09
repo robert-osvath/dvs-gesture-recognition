@@ -12,27 +12,27 @@ The script trains the base 3-Layer CNN model, as well as runs a test with the te
 
 Command: 
 ```bash
-python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME]
+python cnn_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME]
 ```
 
 Example:
 ```bash 
-python3 script.py --train-data-size 0.9 --val-data-size 0.1 --random-seed 42 --representation n_bins --max-epochs 100 --name n_bins_09^_42
-python3 script.py --train-data-size 0.9 --val-data-size 0.1 --random-seed 42 --representation binary --max-epochs 100 --name binary_09_42
+python3 cnn_script.py --train-data-size 0.9 --val-data-size 0.1 --random-seed 42 --representation n_bins --max-epochs 100 --name n_bins_09^_42
+python3 cnn_script.py --train-data-size 0.9 --val-data-size 0.1 --random-seed 42 --representation binary --max-epochs 100 --name binary_09_42
 ```
 
 ## Extended script with added representations of time window, spike count and timesurface
 
 Command for updated script:
 ```bash
-python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --conv-layers [CONV_LAYERS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --output-dir [OUTPUT_DIR]
+python new_cnn_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --conv-layers [CONV_LAYERS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --output-dir [OUTPUT_DIR]
 ```
 
 ## Script to train a ResNet model with 
 
 Command:
 ```bash 
-python resnet_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --num-blocks [NUM_RESIDUAL_BLOCKS] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --output-dir [OUTPUT_DIR]
+python resnet_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --num-blocks [NUM_RESIDUAL_BLOCKS] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --patience [PATIENCE] --output-dir [OUTPUT_DIR]
 ```
 
 ## Script to train a 3d Convolutional Spiking Neural Network model
@@ -43,5 +43,5 @@ Created a new SNN model that uses 3d convolutions for feature extraction. <br>
 
 Command for the snn script:
 ```bash
-python script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --loss [LOSS_FN] --beta [BETA] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --output-dir [OUTPUT_DIR]
+python snn_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --loss [LOSS_FN] --beta [BETA] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --output-dir [OUTPUT_DIR]
 ```

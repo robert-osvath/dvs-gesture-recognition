@@ -155,6 +155,10 @@ def main():
     )
 
     parser.add_argument(
+        "--patience", type=int, required=False, help="Set the early stopping patience.", default=2
+    )
+
+    parser.add_argument(
         "--batch-size", type=int, default=10, help="Set the batch size."
     )
 
@@ -173,6 +177,7 @@ def main():
     num_blocks = args.num_blocks
     representation = args.representation
     max_epochs = args.max_epochs
+    patience = args.patience
     exp_name = args.name
     batch_size = args.batch_size
     output_dir = args.output_dir
@@ -235,7 +240,7 @@ def main():
     model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=11)
 
     # Create the trainer
-    trainer = train_setup(max_epochs=max_epochs, patience=2, log_dir="./logs")
+    trainer = train_setup(max_epochs=max_epochs, patience=patience, log_dir="./logs")
 
     # Train the model
     train(model, train_loader, val_loader, trainer)
