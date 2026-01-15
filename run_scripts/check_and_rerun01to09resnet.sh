@@ -4,6 +4,7 @@ count=0
 for seed in 42 13 93 #45 96 6 98 59 44
 do
 	for repr in n_bins binary time_window spike_count timesurface
+	#for repr in time_window spike_count timesurface
 	do
 	    for blocks in 1 3 5 10
 	    do
