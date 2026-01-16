@@ -156,6 +156,10 @@ def main():
     parser.add_argument(
         "--batch-size", type=int, default=10, help="Set the batch size."
     )
+    
+    parser.add_argument(
+        "--desired-fc", type=int, default=100, help="Set desired frame count per sample."
+    )
 
     parser.add_argument(
         "--name", type=str, required=True, help="Set the experiment name."
@@ -231,9 +235,11 @@ def main():
     val_dataset=val_data
     test_dataset = DVSGestureData(test_data)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=PadTensors())
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=PadTensors())
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=PadTensors())
+    collate_fn=PadTensors(batch_first=True,args.desired_fc)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
 
     #Create the model
     model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=11)

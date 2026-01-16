@@ -1,0 +1,13 @@
+tonic==1.6.0
+torch
+torchvision
+numpy==1.24.3
+tqdm
+torchmetrics
+lightning==2.3.3
+pillow==10.4.0
+seaborn==0.13.2
+tensorboard
+tensorflow
+snntorch==0.9.1
+#aedat==2.1.0
