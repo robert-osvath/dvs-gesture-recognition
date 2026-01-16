@@ -17,17 +17,18 @@ class FrameCountStats:
             self.min_frame_count = min(self.max_frame_count,l)
             self.running_mean = self.running_mean*0.9+0.1*np.mean([x.shape[0] for (x,_) in  batch])
             self.histo[l]=1+self.histo[l] if l in self.histo else 0
+        return batch
 
-    def getMaxFrameCount():
+    def getMaxFrameCount(self):
         return self.max_frame_count
 
-    def getMaxFrameCount():
-        return self.max_frame_count
+    def getMinFrameCount(self):
+        return self.min_frame_count
     
-    def getRunningMeanFrameCount():
+    def getRunningMeanFrameCount(self):
         return self.running_mean
 
-    def getHistoFrameCount():
+    def getHistoFrameCount(self):
         return self.histo
 
 class PadTensors:

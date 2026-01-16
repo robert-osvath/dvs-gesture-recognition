@@ -46,17 +46,16 @@ def count_frames(args):
 
     test_dataset = DVSGestureData(tonic.datasets.DVSGesture(save_to=("./data"), train=False, transform=transform))
 
-
     print(train_dataset)
 
     collate_fn=FrameCountStats(batch_first=True)
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn,num_workers=args.num_workers)
+    #train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, persistent_workers=True, collate_fn=collate_fn,num_workers=args.num_workers)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn)
     
     print(train_loader)
-    for i,(x,y) in enumerate(train_loader):
-        print("processing batch %d running_mean ",collate_fn.getRunningMeanFrameCount())
+    for i,_ in enumerate(train_loader):
+        print("processing batch %d running_mean %.2f"%(i,collate_fn.getRunningMeanFrameCount()))
         break
-        pass
 
     collate_fn=FrameCountStats(batch_first=True,
             min=collate_fn.getMinFrameCount(),
@@ -64,9 +63,11 @@ def count_frames(args):
             running_mean=collate_fn.getRunningMeanFrameCount(),
             histo=collate_fn.getHistoFrameCount()
             )
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn,num_workers=args.num_workers)
-    for x,y in test_loader:
-        pass
+    #test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, persistent_workers=True, collate_fn=collate_fn,num_workers=args.num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn)
+    for i,_ in enumerate(test_loader):
+        print("processing batch %d running_mean %.2f"%(i,collate_fn.getRunningMeanFrameCount()))
+        break 
 
     # Save script params and outputs in a csv file
     df = pd.DataFrame(
@@ -77,7 +78,11 @@ def count_frames(args):
             "running_mean_frame_count": [collate_fn.getRunningMeanFrameCount()],
         }
     )
-    df = pd.concat(df,pd.DataFrame.fromDict(collate_fn.getHisto()))
+    df_histo=pd.DataFrame()
+    df_histo.fromDict(collate_fn.getHisto())
+    df=pd.concat(df,df_histo)
+
+    #df = pd.concat(df,pd.DataFrame.fromDict(collate_fn.getHisto()))
 
     filename = "%s/%s_counts.csv"%(output_dir,exp_name)
     file_exists = os.path.isfile(filename)
@@ -86,6 +91,7 @@ def count_frames(args):
     #df.to_csv(filename, mode="a", header=not file_exists, index=False)
 
     df.to_csv(filename, mode="w", header=True, index=False)
+
 def main():
     parser = argparse.ArgumentParser(
         description="A script that takes command-line arguments."
@@ -99,9 +105,9 @@ def main():
         "--batch-size", type=int, default=256, help="Set the batch size."
     )
     
-    parser.add_argument(
-        "--num-workers", type=int, default=48, help="Set the number of workers for data loader."
-    )
+    #parser.add_argument(
+    #    "--num-workers", type=int, default=48, help="Set the number of workers for data loader."
+    #)
     
     representations=["n_bins", "binary", "time_window", "spike_count", "timesurface"]
 
