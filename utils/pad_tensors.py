@@ -12,10 +12,11 @@ class FrameCountStats:
 
     def __call__(self, batch):
         for x,_ in batch:
-            l=x.shape[0]
+#            print("--looking at ",x.shape)
+            l=x.shape[1]
             self.max_frame_count = max(self.max_frame_count,l)
             self.min_frame_count = min(self.max_frame_count,l)
-            self.running_mean = self.running_mean*0.9+0.1*np.mean([x.shape[0] for (x,_) in  batch])
+            self.running_mean = self.running_mean*0.9+0.1*np.mean([l for (x,_) in  batch])
             self.histo[l]=1+self.histo[l] if l in self.histo else 0
         return batch
 
@@ -40,8 +41,8 @@ class PadTensors:
         samples_output = []
         targets_output = []
 
-        print("BATCH_LENGTH ",len(batch))
-        [print(y,x.shape) for x,y in batch]
+        #print("BATCH_LENGTH ",len(batch))
+        #[print(y,x.shape) for x,y in batch]
 
         length = self.expected_frame_count
         if (length==-1):
@@ -52,10 +53,10 @@ class PadTensors:
                 sample = torch.tensor(sample)
             if not isinstance(target, torch.Tensor):
                 target = torch.tensor(target)
-            if sample.shape[0]<length:
+            if sample.shape[1]<length:
                 if sample.is_sparse:
                     sample.sparse_resize_(
-                        (length-sample.shape[0], sample.shape[1], sample.shape[2], sample.shape[3]),
+                        (shape[0],length-sample.shape[1], sample.shape[2], sample.shape[3]),
                         sample.sparse_dim(),
                         sample.dense_dim(),
                     )
@@ -64,16 +65,16 @@ class PadTensors:
                         (
                             sample,
                             torch.zeros(
-                                (length-sample.shape[0], sample.shape[1], sample.shape[2], sample.shape[3]),
+                                (sample.shape[0],length-sample.shape[1],sample.shape[2], sample.shape[3]),
                                 device=sample.device
                             ),
                         ),
                         dim=1
                     )
-            elif sample.shape[0]>length:
-                sample = sample[:length]
+            elif sample.shape[1]>length:
+                sample = sample[:,:length,:,:]
                 
-            print("AFTER_PROCESSING:", sample.shape)
+            #print("AFTER_PROCESSING:", sample.shape)
             samples_output.append(sample)
             targets_output.append(target)
 
@@ -82,6 +83,6 @@ class PadTensors:
             targets_output = torch.stack(targets_output, 0 if self.batch_first else -1)
         else:
             targets_output = torch.tensor(targets_output, device=targets_output[0].device)
-        print("SAMPLES_OUTPUT SIZE",samples_output.shape)
+        #print("SAMPLES_OUTPUT SIZE",samples_output.shape)
         return (samples_output, targets_output)
     

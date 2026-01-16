@@ -46,16 +46,13 @@ def count_frames(args):
 
     test_dataset = DVSGestureData(tonic.datasets.DVSGesture(save_to=("./data"), train=False, transform=transform))
 
-    print(train_dataset)
 
     collate_fn=FrameCountStats(batch_first=True)
     #train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, persistent_workers=True, collate_fn=collate_fn,num_workers=args.num_workers)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn)
     
-    print(train_loader)
     for i,_ in enumerate(train_loader):
         print("processing batch %d running_mean %.2f"%(i,collate_fn.getRunningMeanFrameCount()))
-        break
 
     collate_fn=FrameCountStats(batch_first=True,
             min=collate_fn.getMinFrameCount(),
@@ -67,7 +64,6 @@ def count_frames(args):
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn)
     for i,_ in enumerate(test_loader):
         print("processing batch %d running_mean %.2f"%(i,collate_fn.getRunningMeanFrameCount()))
-        break 
 
     # Save script params and outputs in a csv file
     df = pd.DataFrame(
@@ -78,11 +74,8 @@ def count_frames(args):
             "running_mean_frame_count": [collate_fn.getRunningMeanFrameCount()],
         }
     )
-    df_histo=pd.DataFrame()
-    df_histo.fromDict(collate_fn.getHisto())
-    df=pd.concat(df,df_histo)
-
-    #df = pd.concat(df,pd.DataFrame.fromDict(collate_fn.getHisto()))
+    for nb,count in collate_fn.getHistoFrameCount().items():
+        df[nb]=count
 
     filename = "%s/%s_counts.csv"%(output_dir,exp_name)
     file_exists = os.path.isfile(filename)
