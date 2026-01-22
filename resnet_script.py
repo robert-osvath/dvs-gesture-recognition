@@ -17,7 +17,7 @@ from dataset.dataset import DVSGestureData, CachedDVSGestureData
 import argparse
 import os
 import pandas as pd
-from utils.pad_tensors import PadTensors
+from utils.pad_tensors import PadTensors, PadTensorsUpdated
 
 device = "gpu" if torch.cuda.is_available() else "cpu"
 
@@ -156,6 +156,10 @@ def main():
     parser.add_argument(
         "--batch-size", type=int, default=10, help="Set the batch size."
     )
+    
+    parser.add_argument(
+        "--desired-fc", type=int, default=100, help="Set desired frame count per sample."
+    )
 
     parser.add_argument(
         "--name", type=str, required=True, help="Set the experiment name."
@@ -182,54 +186,52 @@ def main():
     # Set the random seed
     L.seed_everything(random_seed, workers=True)
 
-    # Data transforms
-    sensor_size = tonic.datasets.DVSGesture.sensor_size
-    if representation == "n_bins":
-        transform = TT.ToFrame(sensor_size=sensor_size, n_time_bins=100)
-    elif representation == "binary":
-        transform = TT.Compose(
-            [
-                TT.ToFrame(sensor_size=sensor_size, n_time_bins=100 * 2),
-                TT.ToBinaRep(n_frames=100, n_bits=2),
-            ]
-        )
-    elif representation == "time_window":
-        transform = TT.ToFrame(sensor_size=sensor_size, time_window=10000)
-    elif representation == "spike_count":
-        transform = TT.ToFrame(sensor_size=sensor_size, event_count=1000)
-    elif representation == "timesurface":
-        transform = TT.ToTimesurface(
-            sensor_size=sensor_size, 
-            tau=30000,
-            dt=10000
-        )
-    else:
-        raise ValueError("Invalid representation.")
+    # Data transforms -- not needed for cached data
+    # sensor_size = tonic.datasets.DVSGesture.sensor_size
+    # if representation == "n_bins":
+    #     transform = TT.ToFrame(sensor_size=sensor_size, n_time_bins=100)
+    # elif representation == "binary":
+    #     transform = TT.Compose(
+    #         [
+    #             TT.ToFrame(sensor_size=sensor_size, n_time_bins=100 * 2),
+    #             TT.ToBinaRep(n_frames=100, n_bits=2),
+    #         ]
+    #     )
+    # elif representation == "time_window":
+    #     transform = TT.ToFrame(sensor_size=sensor_size, time_window=10000)
+    # elif representation == "spike_count":
+    #     transform = TT.ToFrame(sensor_size=sensor_size, event_count=1000)
+    # elif representation == "timesurface":
+    #     transform = TT.ToTimesurface(
+    #         sensor_size=sensor_size, 
+    #         tau=30000,
+    #         dt=10000
+    #     )
+    # else:
+    #     raise ValueError("Invalid representation.")
 
     # Validate train and val data size
     if train_data_size + val_data_size > 1 or train_data_size < 0 or val_data_size < 0:
         raise ValueError("Invalid train or val data size.")
+    
+    cached_train_dataset = CachedDVSGestureData(cache_path=os.path.join('./cache', representation, 'train'))
+    cached_test_dataset = CachedDVSGestureData(cache_path=os.path.join('./cache', representation, 'test'))
 
     # Load the datasets
     print("splitting with ",train_data_size,val_data_size,1-train_data_size-val_data_size)
 
     train_data, val_data, _ = random_split(
-        tonic.datasets.DVSGesture(save_to=("./data"), train=True, transform=transform),
+        cached_train_dataset,
         [train_data_size, val_data_size, round((1 - train_data_size - val_data_size)*100)/100],
     )
 
-    test_data = tonic.datasets.DVSGesture(
-        save_to=("./data"), train=False, transform=transform
-    )
+    test_data = cached_test_dataset
 
-    # Create the transformed datasets
-    train_dataset = CachedDVSGestureData(train_data, cache_path='./cache/train')
-    val_dataset = CachedDVSGestureData(val_data, cache_path='./cache/val')
-    test_dataset = DVSGestureData(test_data)
+    collate_fn=PadTensors(batch_first=True)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=PadTensors())
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=PadTensors())
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=PadTensors())
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
+    val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
 
     #Create the model
     model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=11)

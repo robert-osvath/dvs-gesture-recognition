@@ -102,7 +102,8 @@ def main():
     #    "--num-workers", type=int, default=48, help="Set the number of workers for data loader."
     #)
     
-    representations=["n_bins", "binary", "time_window", "spike_count", "timesurface"]
+    # representations=["n_bins", "binary", "time_window", "spike_count", "timesurface"]
+    representations=["time_window", "spike_count", "timesurface"]
 
     args = parser.parse_args()
     output_dir = args.output_dir
