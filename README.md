@@ -45,3 +45,12 @@ Command for the snn script:
 ```bash
 python snn_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --representation [REPRESENTATION] --loss [LOSS_FN] --beta [BETA] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --output-dir [OUTPUT_DIR]
 ```
+
+## Caching the whole dataset
+
+For trying to prevent OOM errors, I've added a script which caches the whole dataset based on a selected representation, which would hopefully make the more complex neural models learn easier.
+
+Command:
+```bash
+python cache_dataset.py --representation timesurface
+```
