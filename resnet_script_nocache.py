@@ -235,7 +235,7 @@ def main():
     val_dataset=val_data
     test_dataset = DVSGestureData(test_data)
 
-    collate_fn=PadTensorsUpdated(batch_first=True, expected_frame_count=args.desired_fc)
+    collate_fn=PadTensorsUpdated(batch_first=True, target_frames=args.desired_fc)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)

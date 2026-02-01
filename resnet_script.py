@@ -146,6 +146,14 @@ def main():
     )
 
     parser.add_argument(
+        "--pooling_mode",
+        type=str,
+        choices=["max", "avg", "linear", "random"],
+        required=True,
+        help="The pooling mode to use when resizing temporal dimension.",
+    )
+
+    parser.add_argument(
         "--max-epochs", type=int, required=True, help="Set the max epochs."
     )
 
@@ -175,6 +183,8 @@ def main():
     random_seed = args.random_seed
     num_blocks = args.num_blocks
     representation = args.representation
+    pooling_mode = args.pooling_mode
+    desired_fc = args.desired_fc
     max_epochs = args.max_epochs
     patience = args.patience
     exp_name = args.name
@@ -227,7 +237,7 @@ def main():
 
     test_data = cached_test_dataset
 
-    collate_fn=PadTensors(batch_first=True)
+    collate_fn=PadTensorsUpdated(batch_first=True, target_frames=desired_fc, mode=pooling_mode)
 
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)

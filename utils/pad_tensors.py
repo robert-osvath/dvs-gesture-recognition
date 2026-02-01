@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import torch.nn.functional as F
 
 class FrameCountStats:
     def __init__(self, batch_first: bool = True, min=0, max=0,running_mean=0, histo=dict()):
@@ -74,9 +75,16 @@ class PadTensors:
 
 
 class PadTensorsUpdated:
-    def __init__(self, batch_first: bool = True, expected_frame_count=-1):
+    """
+    Resizes the temporal dimension (T) of a (C, T, H, W) tensor to `target_frames`.
+    - If input T > target: Downsamples (pools) information.
+    - If input T < target: Pads information with zeros.
+    This ensures every sample has exactly `target_frames`.
+    """
+    def __init__(self, batch_first: bool = True, target_frames=-1, mode = 'max'):
         self.batch_first = batch_first
-        self.length = expected_frame_count
+        self.length = target_frames
+        self.mode = mode 
 
     def __call__(self, batch):
         samples_output = []
@@ -85,8 +93,7 @@ class PadTensorsUpdated:
         print("BATCH_LENGTH ",len(batch))
         [print(y,x.shape) for x,y in batch]
 
-        length = self.expected_frame_count
-        if (length==-1):
+        if (self.length==-1):
             return batch
 
         for sample, target in batch:
@@ -94,10 +101,10 @@ class PadTensorsUpdated:
                 sample = torch.tensor(sample)
             if not isinstance(target, torch.Tensor):
                 target = torch.tensor(target)
-            if sample.shape[1]<length:
+            if sample.shape[1]<self.length:
                 if sample.is_sparse:
                     sample.sparse_resize_(
-                        (shape[0],length-sample.shape[1], sample.shape[2], sample.shape[3]),
+                        (sample.shape[0],self.length-sample.shape[1], sample.shape[2], sample.shape[3]),
                         sample.sparse_dim(),
                         sample.dense_dim(),
                     )
@@ -106,14 +113,29 @@ class PadTensorsUpdated:
                         (
                             sample,
                             torch.zeros(
-                                (sample.shape[0],length-sample.shape[1],sample.shape[2], sample.shape[3]),
+                                (sample.shape[0],self.length-sample.shape[1],sample.shape[2], sample.shape[3]),
                                 device=sample.device
                             ),
                         ),
                         dim=1
                     )
-            elif sample.shape[1]>length:
-                sample = sample[:,:length,:,:]
+            elif sample.shape[1]>self.length:
+                if self.mode == 'max':
+                    sample = F.adaptive_max_pool3d(sample, output_size=(self.length, None, None))
+                elif self.mode == 'avg':
+                    sample = F.adaptive_avg_pool3d(sample, output_size=(self.length, None, None))
+                elif self.mode == 'linear':
+                    sample = sample.unsqueeze(0)
+                    sample = F.interpolate(sample, 
+                                           size=(self.length, sample.shape[3], sample.shape[4]), 
+                                           mode='trilinear', 
+                                           align_corners=False)
+                    sample = sample.squeeze(0)
+                elif self.mode == 'random':
+                    indices = torch.randperm(sample.shape[1])[:self.length].sort()[0]
+                    sample = sample[indices]
+                else:
+                    raise ValueError(f"Unknown mode: {self.mode}")
                 
             #print("AFTER_PROCESSING:", sample.shape)
             samples_output.append(sample)

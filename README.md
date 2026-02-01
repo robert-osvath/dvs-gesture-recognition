@@ -32,7 +32,7 @@ python new_cnn_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL
 
 Command:
 ```bash 
-python resnet_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --num-blocks [NUM_RESIDUAL_BLOCKS] --representation [REPRESENTATION] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --patience [PATIENCE] --output-dir [OUTPUT_DIR]
+python resnet_script.py --train-data-size [TRAIN_DATA_SIZE] --val-data-size[VAL_DATA_SIZE] --random-seed [RANDOM_SEED] --num-blocks [NUM_RESIDUAL_BLOCKS] --representation [REPRESENTATION] --pooling-mode [POOLING_MODE] --desired_fc [DESIRED_FC] --max-epochs [MAX_EPOCHS] --name [EXPERIMENT NAME] --batch-size [BATCH_SIZE] --patience [PATIENCE] --output-dir [OUTPUT_DIR]
 ```
 
 ## Script to train a 3d Convolutional Spiking Neural Network model
