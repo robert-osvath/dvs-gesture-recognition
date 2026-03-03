@@ -17,7 +17,7 @@ from dataset.dataset import DVSGestureData
 import argparse
 import os
 import pandas as pd
-from utils.pad_tensors import PadTensors
+from utils.pad_tensors import PadTensors, PadTensorsUpdated
 
 device = "gpu" if torch.cuda.is_available() else "cpu"
 
@@ -156,6 +156,14 @@ def main():
     )
 
     parser.add_argument(
+        "--batch-fc", type=str, help="Desired frame count of the batches."
+    )
+
+    parser.add_argument(
+        "--pooling-mode", type=str, default="max", help="Set the pooling mode."
+    )
+
+    parser.add_argument(
         "--max-epochs", type=int, required=True, help="Set the max epochs."
     )
 
@@ -177,6 +185,8 @@ def main():
     random_seed = args.random_seed
     conv_layers = args.conv_layers
     representation = args.representation
+    desired_frame_count = args.batch_fc
+    pooling_mode = args.pooling_mode
     max_epochs = args.max_epochs
     exp_name = args.name
     batch_size = args.batch_size
@@ -236,9 +246,11 @@ def main():
     # val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4)
     # test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=PadTensors())
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=PadTensors())
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=PadTensors())
+    collate_fn = PadTensorsUpdated(target_frames=int(desired_frame_count), mode='max')
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=15)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=15)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=15)
 
     # Create the model
     model = GestureRecognition(1e-3, conv_layers)
@@ -252,8 +264,13 @@ def main():
     # Train the model
     train(model, train_loader, val_loader, trainer)
 
+    train_metrics = trainer.callback_metrics.copy()
+    train_epochs = trainer.current_epoch
+
     # Test the model
     test(model, test_loader, trainer)
+
+    test_metrics = trainer.callback_metrics.copy()
 
     # Get the number of epochs used for training
     num_epochs = trainer.current_epoch + 1
@@ -261,21 +278,24 @@ def main():
     # Save script params and outputs in a csv file
     df = pd.DataFrame(
         {
+            "name": [exp_name],
             "train_data_size": [train_data_size],
             "val_data_size": [val_data_size],
             "random_seed": [random_seed],
             "representation": [representation],
-            "train_acc": [model.train_acc.compute().item()],
-            "val_acc": [model.val_acc.compute().item()],
-            "test_acc": [model.test_acc.compute().item()],
-            "num_epochs": [num_epochs],
+            "train_acc": [train_metrics["train_acc"].item()],
+            "val_acc": [train_metrics["val_acc"].item()],
+            "test_acc": [test_metrics["test_acc"].item()],
+            "num_epochs": [train_epochs],
             "batch_size": [batch_size],
+            "target_frames": [desired_frame_count],
+            "pooling_mode": [pooling_mode]
         }
     )
-    filename = "%s/%s_params_and_outputs.csv"%(output_dir,exp_name)
+    filename = "%s/dvs128_cnn_09_batch%s_10seeds.csv"%(output_dir, batch_size)
     file_exists = os.path.isfile(filename)
     #df.to_csv(filename, mode="a", header=not file_exists, index=False)
-    df.to_csv(filename, mode="w", header=True, index=False)
+    df.to_csv(filename, mode="a", header=not file_exists, index=False)
 
 
 

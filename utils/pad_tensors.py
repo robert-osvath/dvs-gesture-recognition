@@ -90,8 +90,8 @@ class PadTensorsUpdated:
         samples_output = []
         targets_output = []
 
-        print("BATCH_LENGTH ",len(batch))
-        [print(y,x.shape) for x,y in batch]
+        # print("BATCH_LENGTH ",len(batch))
+        # [print(y,x.shape) for x,y in batch]
 
         if (self.length==-1):
             return batch

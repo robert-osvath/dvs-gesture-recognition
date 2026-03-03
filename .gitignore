@@ -7,3 +7,8 @@ venv
 dvs_videos_v2
 *.zip
 cache
+settings.json
+data/DVSGesture/
+*.stderr
+*.stdout
+logfile.txt

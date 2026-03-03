@@ -162,6 +162,10 @@ def main():
     )
 
     parser.add_argument(
+        "--pooling-mode", type=str, default='max', help="Set the adaptive pooling mode for the padding"
+    )
+
+    parser.add_argument(
         "--name", type=str, required=True, help="Set the experiment name."
     )
     
@@ -177,6 +181,8 @@ def main():
     representation = args.representation
     max_epochs = args.max_epochs
     patience = args.patience
+    target_frames = args.desired_fc
+    pooling_mode = args.pooling_mode
     exp_name = args.name
     batch_size = args.batch_size
     output_dir = args.output_dir
@@ -231,15 +237,15 @@ def main():
     #val_dataset = CachedDVSGestureData(val_data, cache_path='./cache/val')
     #test_dataset = DVSGestureData(test_data)
 
-    train_dataset=train_data
-    val_dataset=val_data
+    train_dataset=DVSGestureData(train_data)
+    val_dataset=DVSGestureData(val_data)
     test_dataset = DVSGestureData(test_data)
 
-    collate_fn=PadTensorsUpdated(batch_first=True, target_frames=args.desired_fc)
+    collate_fn=PadTensorsUpdated(batch_first=True, target_frames=target_frames, mode=pooling_mode)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=15)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=15)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=15)
 
     #Create the model
     model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=11)
@@ -250,25 +256,33 @@ def main():
     # Train the model
     train(model, train_loader, val_loader, trainer)
 
+    train_metrics = trainer.callback_metrics.copy()
+    train_epochs = trainer.current_epoch
+
     # Test the model
     test(model, test_loader, trainer)
 
-    # Get the number of epochs used for training
-    num_epochs = trainer.current_epoch + 1
+    test_metrics = trainer.callback_metrics.copy()
+
+    print(train_metrics)
+    print(test_metrics)
 
     # Save script params and outputs in a csv file
     df = pd.DataFrame(
         {
+            "name": [exp_name],
             "train_data_size": [train_data_size],
             "val_data_size": [val_data_size],
             "random_seed": [random_seed],
             "representation": [representation],
-            "train_acc": [trainer.callback_metrics["train_acc"].item()],
-            "val_acc": [trainer.callback_metrics["val_acc"].item()],
-            "test_acc": [trainer.callback_metrics["test_acc"].item()],
-            "num_epochs": [num_epochs],
+            "train_acc": [train_metrics["train_acc"].item()],
+            "val_acc": [train_metrics["val_acc"].item()],
+            "test_acc": [test_metrics["test_acc"].item()],
+            "num_epochs": [train_epochs],
             "batch_size": [batch_size],
             "num_blocks": [num_blocks],
+            "target_frames": [target_frames],
+            "pooling_mode": [pooling_mode]
         }
     )
     filename = "%s/%s_params_and_outputs.csv"%(output_dir,exp_name)
@@ -277,7 +291,7 @@ def main():
     print ("Saving data to %s"%filename)
     #df.to_csv(filename, mode="a", header=not file_exists, index=False)
 
-    df.to_csv(filename, mode="w", header=True, index=False)
+    df.to_csv(filename, mode="a", header=False, index=False)
 
 
 if __name__ == "__main__":
