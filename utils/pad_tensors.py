@@ -131,9 +131,6 @@ class PadTensorsUpdated:
                                            mode='trilinear', 
                                            align_corners=False)
                     sample = sample.squeeze(0)
-                elif self.mode == 'random':
-                    indices = torch.randperm(sample.shape[1])[:self.length].sort()[0]
-                    sample = sample[indices]
                 else:
                     raise ValueError(f"Unknown mode: {self.mode}")
                 

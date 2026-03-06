@@ -246,11 +246,11 @@ def main():
     # val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4)
     # test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 
-    collate_fn = PadTensorsUpdated(target_frames=int(desired_frame_count), mode='max')
+    collate_fn = PadTensorsUpdated(target_frames=int(desired_frame_count), mode=pooling_mode)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=15)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=15)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=15)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=8)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=8)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=8)
 
     # Create the model
     model = GestureRecognition(1e-3, conv_layers)
