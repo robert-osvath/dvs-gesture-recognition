@@ -149,16 +149,13 @@ def main():
         "--max-epochs", type=int, required=True, help="Set the max epochs."
     )
 
-    parser.add_argument(
-        "--patience", type=int, required=False, help="Set the early stopping patience.", default=2
-    )
 
     parser.add_argument(
         "--batch-size", type=int, default=10, help="Set the batch size."
     )
     
     parser.add_argument(
-        "--desired-fc", type=int, default=100, help="Set desired frame count per sample."
+        "--batch-fc", type=int, default=100, help="Set desired frame count per sample."
     )
 
     parser.add_argument(
@@ -180,8 +177,7 @@ def main():
     num_blocks = args.num_blocks
     representation = args.representation
     max_epochs = args.max_epochs
-    patience = args.patience
-    target_frames = args.desired_fc
+    target_frames = args.batch_fc
     pooling_mode = args.pooling_mode
     exp_name = args.name
     batch_size = args.batch_size
@@ -251,7 +247,7 @@ def main():
     model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=11)
 
     # Create the trainer
-    trainer = train_setup(max_epochs=max_epochs, patience=patience, log_dir="./logs")
+    trainer = train_setup(max_epochs=max_epochs, patience=2, log_dir="./logs")
 
     # Train the model
     train(model, train_loader, val_loader, trainer)
@@ -264,8 +260,8 @@ def main():
 
     test_metrics = trainer.callback_metrics.copy()
 
-    print(train_metrics)
-    print(test_metrics)
+    # Get the number of epochs used for training
+    num_epochs = trainer.current_epoch + 1
 
     # Save script params and outputs in a csv file
     df = pd.DataFrame(
@@ -280,18 +276,14 @@ def main():
             "test_acc": [test_metrics["test_acc"].item()],
             "num_epochs": [train_epochs],
             "batch_size": [batch_size],
-            "num_blocks": [num_blocks],
             "target_frames": [target_frames],
             "pooling_mode": [pooling_mode]
         }
     )
-    filename = "%s/%s_params_and_outputs.csv"%(output_dir,exp_name)
+    filename = "%s/dvs128_resnet_09_batch%s_10seeds.csv"%(output_dir, batch_size)
     file_exists = os.path.isfile(filename)
-
-    print ("Saving data to %s"%filename)
     #df.to_csv(filename, mode="a", header=not file_exists, index=False)
-
-    df.to_csv(filename, mode="a", header=False, index=False)
+    df.to_csv(filename, mode="a", header=not file_exists, index=False)
 
 
 if __name__ == "__main__":

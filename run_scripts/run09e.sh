@@ -4,7 +4,7 @@ for seed in 42 13 93 45 96 6 98 59 44
 do
 	for pooling in max avg linear
 	do
-		for target_fc in 200 300 400 500 600 700 800
+		for target_fc in 25 50 100 150 200 300 400 500 600 700 800
 		do
 			res=`cat results_with_target_fc/dvs128_cnn_09_batch8_10seeds.csv | grep ${repr}_09_${seed}_${batch}_${target_fc}_${pooling}`
 			if [ -z "$res" ]
