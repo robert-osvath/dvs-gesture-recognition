@@ -1,0 +1,4 @@
+name,train_data_size,val_data_size,random_seed,representation,train_acc,val_acc,test_acc,num_epochs,batch_size,target_frames,pooling_mode
+time_window_09_42_8_200_max_1,0.9,0.1,42,time_window,0.39381444454193115,0.3177570104598999,0.375,32,8,200,max
+time_window_09_42_8_300_max_1,0.9,0.1,42,time_window,0.2608247399330139,0.13084112107753754,0.09090909361839294,14,8,300,max
+time_window_09_42_8_400_max_1,0.9,0.1,42,time_window,0.28659793734550476,0.25233644247055054,0.31439393758773804,24,8,400,max
