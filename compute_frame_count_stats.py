@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 import os
 from models.resnet.resnet import ResNet3D
-from dataset.dataset import DVSGestureData, CachedDVSGestureData
+from dataset.dataset import DVSGestureData, CachedDVSGestureData, DailyActionDVS
 import argparse
 import os
 import pandas as pd
@@ -17,9 +17,10 @@ def count_frames(args):
     # Data transforms
     output_dir=args.output_dir
     representation=args.representation
-    exp_name=representation
+    dataset_name=args.dataset
+    exp_name=representation if dataset_name == "dvsgesture" else f"{dataset_name}_{representation}"
 
-    sensor_size = tonic.datasets.DVSGesture.sensor_size
+    sensor_size = DailyActionDVS.sensor_size if dataset_name == "dailyaction" else tonic.datasets.DVSGesture.sensor_size
     if representation == "n_bins":
         transform = TT.ToFrame(sensor_size=sensor_size, n_time_bins=100)
     elif representation == "binary":
@@ -42,9 +43,10 @@ def count_frames(args):
     else:
         raise ValueError("Invalid representation.")
 
-    train_dataset = DVSGestureData(tonic.datasets.DVSGesture(save_to=("./data"), train=True, transform=transform))
+    dataset_cls = DailyActionDVS if dataset_name == "dailyaction" else tonic.datasets.DVSGesture
+    train_dataset = DVSGestureData(dataset_cls(save_to=("./data"), train=True, transform=transform))
 
-    test_dataset = DVSGestureData(tonic.datasets.DVSGesture(save_to=("./data"), train=False, transform=transform))
+    test_dataset = DVSGestureData(dataset_cls(save_to=("./data"), train=False, transform=transform))
 
 
     collate_fn=FrameCountStats(batch_first=True)
@@ -96,6 +98,14 @@ def main():
     
     parser.add_argument(
         "--batch-size", type=int, default=256, help="Set the batch size."
+    )
+
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=["dvsgesture", "dailyaction"],
+        default="dvsgesture",
+        help="The dataset to compute stats for (dvsgesture or dailyaction).",
     )
     
     #parser.add_argument(

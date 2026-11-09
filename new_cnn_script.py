@@ -13,7 +13,7 @@ import seaborn as sns
 from torch.utils.tensorboard import SummaryWriter
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 from models.cnn.new_model import Gesture3DConvNet_v2
-from dataset.dataset import DVSGestureData
+from dataset.dataset import DVSGestureData, DailyActionDVS
 import argparse
 import os
 import pandas as pd
@@ -179,6 +179,14 @@ def main():
         "--output-dir", type=str, required=True, help="Set the output dir name."
     )
 
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=["dvsgesture", "dailyaction"],
+        default="dvsgesture",
+        help="The dataset to use (dvsgesture or dailyaction).",
+    )
+
     args = parser.parse_args()
     train_data_size = args.train_data_size
     val_data_size = args.val_data_size
@@ -191,12 +199,16 @@ def main():
     exp_name = args.name
     batch_size = args.batch_size
     output_dir = args.output_dir
+    dataset_name = args.dataset
 
     # Set the random seed
     L.seed_everything(random_seed, workers=True)
 
     # Data transforms
-    sensor_size = tonic.datasets.DVSGesture.sensor_size
+    sensor_size = DailyActionDVS.sensor_size if dataset_name == "dailyaction" else tonic.datasets.DVSGesture.sensor_size
+    num_classes = DailyActionDVS.num_classes if dataset_name == "dailyaction" else 11
+    dataset_cls = DailyActionDVS if dataset_name == "dailyaction" else tonic.datasets.DVSGesture
+
     if representation == "n_bins":
         transform = TT.ToFrame(sensor_size=sensor_size, n_time_bins=100)
     elif representation == "binary":
@@ -227,11 +239,11 @@ def main():
     print("splitting with ",train_data_size,val_data_size,1-train_data_size-val_data_size)
 
     train_data, val_data, _ = random_split(
-        tonic.datasets.DVSGesture(save_to=("./data"), train=True, transform=transform),
+        dataset_cls(save_to=("./data"), train=True, transform=transform),
         [train_data_size, val_data_size, round((1 - train_data_size - val_data_size)*100)/100],
     )
 
-    test_data = tonic.datasets.DVSGesture(
+    test_data = dataset_cls(
         save_to=("./data"), train=False, transform=transform
     )
 
@@ -246,14 +258,17 @@ def main():
     # val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4)
     # test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 
-    collate_fn = PadTensorsUpdated(target_frames=int(desired_frame_count), mode=pooling_mode)
+    if desired_frame_count is not None and int(desired_frame_count) > 0:
+        collate_fn = PadTensorsUpdated(target_frames=int(desired_frame_count), mode=pooling_mode)
+    else:
+        collate_fn = PadTensors()
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=8)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=8)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=8)
 
     # Create the model
-    model = GestureRecognition(1e-3, conv_layers)
+    model = GestureRecognition(1e-3, conv_layers, num_classes=num_classes)
 
     # Alternatively, you can load the model from a checkpoint
     # model = GestureRecognition.load_from_checkpoint("checkpoints/a.ckpt")
@@ -292,7 +307,9 @@ def main():
             "pooling_mode": [pooling_mode]
         }
     )
-    filename = "%s/dvs128_cnn_09_batch%s_10seeds.csv"%(output_dir, batch_size)
+    os.makedirs(output_dir, exist_ok=True)
+    prefix = "dailyaction" if dataset_name == "dailyaction" else "dvs128"
+    filename = "%s/%s_cnn_09_batch%s_10seeds.csv"%(output_dir, prefix, batch_size)
     file_exists = os.path.isfile(filename)
     #df.to_csv(filename, mode="a", header=not file_exists, index=False)
     df.to_csv(filename, mode="a", header=not file_exists, index=False)

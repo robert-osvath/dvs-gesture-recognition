@@ -4,15 +4,17 @@ import tonic
 import tonic.transforms as TT
 import argparse
 from tqdm import tqdm
+from dataset.dataset import DailyActionDVS
 
-def cache_all_data(train_set, test_set, representation, path='./cache'):    
+def cache_all_data(train_set, test_set, representation, dataset_name="dvsgesture", path='./cache'):
+    base_dir = path if dataset_name == "dvsgesture" else os.path.join(path, dataset_name)
     for idx, (event, target) in enumerate(tqdm(train_set, desc="Caching train set")):
-        cached_path = os.path.join(path, representation, 'train', f"sample_{idx}.pt")
+        cached_path = os.path.join(base_dir, representation, 'train', f"sample_{idx}.pt")
         os.makedirs(os.path.dirname(cached_path), exist_ok=True)
         torch.save((event, target), cached_path)
    
     for idx, (event, target) in enumerate(tqdm(test_set, desc="Caching test set")):
-        cached_path = os.path.join(path, representation, 'test', f"sample_{idx}.pt")
+        cached_path = os.path.join(base_dir, representation, 'test', f"sample_{idx}.pt")
         os.makedirs(os.path.dirname(cached_path), exist_ok=True)
         torch.save((event, target), cached_path)
 
@@ -27,11 +29,19 @@ if __name__ == "__main__":
         required=True,
         help="The event representation of the DVS data to use.",
     )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=["dvsgesture", "dailyaction"],
+        default="dvsgesture",
+        help="The dataset to cache (dvsgesture or dailyaction).",
+    )
 
     args = parser.parse_args()
     representation = args.representation
+    dataset_name = args.dataset
     
-    sensor_size = tonic.datasets.DVSGesture.sensor_size
+    sensor_size = DailyActionDVS.sensor_size if dataset_name == "dailyaction" else tonic.datasets.DVSGesture.sensor_size
     if representation == "n_bins":
         transform = TT.ToFrame(sensor_size=sensor_size, n_time_bins=100)
     elif representation == "binary":
@@ -54,6 +64,7 @@ if __name__ == "__main__":
     else:
         raise ValueError("Invalid representation.")
 
-    train_set = tonic.datasets.DVSGesture(save_to='./data', train=True, transform=transform)
-    test_set = tonic.datasets.DVSGesture(save_to='./data', train=False, transform=transform)
-    cache_all_data(train_set, test_set, representation)
+    dataset_cls = DailyActionDVS if dataset_name == "dailyaction" else tonic.datasets.DVSGesture
+    train_set = dataset_cls(save_to='./data', train=True, transform=transform)
+    test_set = dataset_cls(save_to='./data', train=False, transform=transform)
+    cache_all_data(train_set, test_set, representation, dataset_name=dataset_name)

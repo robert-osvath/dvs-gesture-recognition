@@ -13,7 +13,7 @@ import seaborn as sns
 from torch.utils.tensorboard import SummaryWriter
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 from models.resnet.resnet import ResNet3D
-from dataset.dataset import DVSGestureData, CachedDVSGestureData
+from dataset.dataset import DVSGestureData, CachedDVSGestureData, DailyActionDVS
 import argparse
 import os
 import pandas as pd
@@ -170,6 +170,14 @@ def main():
         "--output-dir", type=str, required=True, help="Set the output dir name."
     )
 
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=["dvsgesture", "dailyaction"],
+        default="dvsgesture",
+        help="The dataset to use (dvsgesture or dailyaction).",
+    )
+
     args = parser.parse_args()
     train_data_size = args.train_data_size
     val_data_size = args.val_data_size
@@ -182,6 +190,7 @@ def main():
     exp_name = args.name
     batch_size = args.batch_size
     output_dir = args.output_dir
+    dataset_name = args.dataset
 
     print("Preparing to save results to %s"%output_dir)
 
@@ -189,7 +198,10 @@ def main():
     L.seed_everything(random_seed, workers=True)
 
     # Data transforms
-    sensor_size = tonic.datasets.DVSGesture.sensor_size
+    sensor_size = DailyActionDVS.sensor_size if dataset_name == "dailyaction" else tonic.datasets.DVSGesture.sensor_size
+    num_classes = DailyActionDVS.num_classes if dataset_name == "dailyaction" else 11
+    dataset_cls = DailyActionDVS if dataset_name == "dailyaction" else tonic.datasets.DVSGesture
+
     if representation == "n_bins":
         transform = TT.ToFrame(sensor_size=sensor_size, n_time_bins=100)
     elif representation == "binary":
@@ -220,11 +232,11 @@ def main():
     print("splitting with ",train_data_size,val_data_size,1-train_data_size-val_data_size)
 
     train_data, val_data, _ = random_split(
-        tonic.datasets.DVSGesture(save_to=("./data"), train=True, transform=transform),
+        dataset_cls(save_to=("./data"), train=True, transform=transform),
         [train_data_size, val_data_size, round((1 - train_data_size - val_data_size)*100)/100],
     )
 
-    test_data = tonic.datasets.DVSGesture(
+    test_data = dataset_cls(
         save_to=("./data"), train=False, transform=transform
     )
 
@@ -237,14 +249,17 @@ def main():
     val_dataset=DVSGestureData(val_data)
     test_dataset = DVSGestureData(test_data)
 
-    collate_fn=PadTensorsUpdated(batch_first=True, target_frames=target_frames, mode=pooling_mode)
+    if target_frames is not None and int(target_frames) > 0:
+        collate_fn=PadTensorsUpdated(batch_first=True, target_frames=int(target_frames), mode=pooling_mode)
+    else:
+        collate_fn=PadTensors(batch_first=True)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=15)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=15)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=15)
 
     #Create the model
-    model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=11)
+    model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=num_classes)
 
     # Create the trainer
     trainer = train_setup(max_epochs=max_epochs, patience=2, log_dir="./logs")
@@ -280,7 +295,9 @@ def main():
             "pooling_mode": [pooling_mode]
         }
     )
-    filename = "%s/dvs128_resnet_09_batch%s_10seeds.csv"%(output_dir, batch_size)
+    os.makedirs(output_dir, exist_ok=True)
+    prefix = "dailyaction" if dataset_name == "dailyaction" else "dvs128"
+    filename = "%s/%s_resnet_09_batch%s_10seeds.csv"%(output_dir, prefix, batch_size)
     file_exists = os.path.isfile(filename)
     #df.to_csv(filename, mode="a", header=not file_exists, index=False)
     df.to_csv(filename, mode="a", header=not file_exists, index=False)

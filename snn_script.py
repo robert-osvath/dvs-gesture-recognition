@@ -13,7 +13,7 @@ import seaborn as sns
 from torch.utils.tensorboard import SummaryWriter
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 from models.snn.snn_model import Gesture3DCSNN
-from dataset.dataset import DVSGestureData
+from dataset.dataset import DVSGestureData, DailyActionDVS
 import argparse
 import os
 import pandas as pd
@@ -210,6 +210,14 @@ def main():
         "--name", type=str, required=True, help="Set the experiment name."
     )
 
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=["dvsgesture", "dailyaction"],
+        default="dvsgesture",
+        help="The dataset to use (dvsgesture or dailyaction).",
+    )
+
     args = parser.parse_args()
     train_data_size = args.train_data_size
     val_data_size = args.val_data_size
@@ -221,12 +229,16 @@ def main():
     exp_name = args.name
     batch_size = args.batch_size
     output_dir = args.output_dir
+    dataset_name = args.dataset
 
     # Set the random seed
     L.seed_everything(random_seed, workers=True)
 
     # Data transforms
-    sensor_size = tonic.datasets.DVSGesture.sensor_size
+    sensor_size = DailyActionDVS.sensor_size if dataset_name == "dailyaction" else tonic.datasets.DVSGesture.sensor_size
+    num_classes = DailyActionDVS.num_classes if dataset_name == "dailyaction" else 11
+    dataset_cls = DailyActionDVS if dataset_name == "dailyaction" else tonic.datasets.DVSGesture
+
     if representation == "n_bins":
         transform = TT.ToFrame(sensor_size=sensor_size, n_time_bins=100)
     elif representation == "binary":
@@ -270,11 +282,11 @@ def main():
     print("splitting with ",train_data_size,val_data_size,left_data)
 
     train_data, val_data, _ = random_split(
-        tonic.datasets.DVSGesture(save_to=("./data"), train=True, transform=transform),
+        dataset_cls(save_to=("./data"), train=True, transform=transform),
         [train_data_size, val_data_size, left_data],
     )
 
-    test_data = tonic.datasets.DVSGesture(
+    test_data = dataset_cls(
         save_to=("./data"), train=False, transform=transform
     )
 
@@ -293,7 +305,7 @@ def main():
     test_loader = DataLoader(test_data, batch_size=batch_size, collate_fn=tonic.collation.PadTensors(batch_first=True), shuffle=False)
 
     # Create the model
-    model = GestureRecognition(lr=0.001, loss_fn=loss_fn, beta=beta)
+    model = GestureRecognition(lr=0.001, loss_fn=loss_fn, beta=beta, num_classes=num_classes)
 
     # Alternatively, you can load the model from a checkpoint
     # model = GestureRecognition.load_from_checkpoint("checkpoints/a.ckpt")

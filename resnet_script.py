@@ -13,7 +13,7 @@ import seaborn as sns
 from torch.utils.tensorboard import SummaryWriter
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 from models.resnet.resnet import ResNet3D
-from dataset.dataset import DVSGestureData, CachedDVSGestureData
+from dataset.dataset import DVSGestureData, CachedDVSGestureData, DailyActionDVS
 import argparse
 import os
 import pandas as pd
@@ -177,6 +177,14 @@ def main():
         "--output-dir", type=str, required=True, help="Set the output dir name."
     )
 
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=["dvsgesture", "dailyaction"],
+        default="dvsgesture",
+        help="The dataset to use (dvsgesture or dailyaction).",
+    )
+
     args = parser.parse_args()
     train_data_size = args.train_data_size
     val_data_size = args.val_data_size
@@ -190,6 +198,7 @@ def main():
     exp_name = args.name
     batch_size = args.batch_size
     output_dir = args.output_dir
+    dataset_name = args.dataset
 
     print("Preparing to save results to %s"%output_dir)
 
@@ -224,8 +233,10 @@ def main():
     if train_data_size + val_data_size > 1 or train_data_size < 0 or val_data_size < 0:
         raise ValueError("Invalid train or val data size.")
     
-    cached_train_dataset = CachedDVSGestureData(cache_path=os.path.join('./cache', representation, 'train'))
-    cached_test_dataset = CachedDVSGestureData(cache_path=os.path.join('./cache', representation, 'test'))
+    cache_base = './cache' if dataset_name == "dvsgesture" else os.path.join('./cache', dataset_name)
+    num_classes = DailyActionDVS.num_classes if dataset_name == "dailyaction" else 11
+    cached_train_dataset = CachedDVSGestureData(cache_path=os.path.join(cache_base, representation, 'train'))
+    cached_test_dataset = CachedDVSGestureData(cache_path=os.path.join(cache_base, representation, 'test'))
 
     # Load the datasets
     print("splitting with ",train_data_size,val_data_size,1-train_data_size-val_data_size)
@@ -244,7 +255,7 @@ def main():
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
 
     #Create the model
-    model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=11)
+    model = ResNet3DModule(num_blocks=num_blocks, lr=1e-3, num_classes=num_classes)
 
     # Create the trainer
     trainer = train_setup(max_epochs=max_epochs, patience=patience, log_dir="./logs")
